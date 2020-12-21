@@ -961,6 +961,7 @@ EXPORTS
 	pdf_annot_MK_BC
 	pdf_annot_MK_BG_rgb
 	pdf_annot_MK_BC_rgb
+	pdf_annot_ap
 	pdf_clean_file
 	pdf_new_cmap
 	pdf_keep_cmap
