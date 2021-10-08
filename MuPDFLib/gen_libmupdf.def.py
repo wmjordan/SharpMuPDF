@@ -45,7 +45,7 @@ def main():
 	os.chdir(os.path.join(os.path.dirname(__file__), "../mupdf"))
 
 	# don't include/export doc_* functions, support for additional input/output formats and form support
-	doc_exports = collectFunctions("source/fitz/document-all.c") + ["fz_get_annot_type", "fz_log_dump_store"]
+	doc_exports = collectFunctions("source/fitz/document-all.c") + ["fz_get_annot_type", "fz_log_dump_store","fz_outline_from_iterator"]
 	more_formats = collectFunctions("source/fitz/svg-device.c") + collectFunctions("source/fitz/output-pcl.c") + collectFunctions("source/fitz/output-pwg.c")
 	form_exports = collectFunctions("source/pdf/pdf-form.c") + collectFunctions("source/pdf/pdf-event.c") + collectFunctions("source/pdf/pdf-appearance.c") + ["pdf_access_submit_event", "pdf_init_ui_pointer_event"]
 	misc_exports = collectFunctions("source/fitz/test-device.c") + ["fz_set_stderr", "fz_set_stdout", "fz_colorspace_name_process_colorants", "fz_getoptw", "fz_valgrind_pixmap", "fz_stderr", "track_usage"]
