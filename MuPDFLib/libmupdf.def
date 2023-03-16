@@ -27,6 +27,11 @@ EXPORTS
 	fz_write_zip_entry
 	fz_close_zip_writer
 	fz_drop_zip_writer
+	fz_new_tree_archive
+	fz_tree_archive_add_buffer
+	fz_tree_archive_add_data
+	fz_new_multi_archive
+	fz_mount_multi_archive
 	fz_new_archive_of_size
 	fz_write_header
 	fz_write_band
@@ -58,6 +63,8 @@ EXPORTS
 	fz_trim_buffer
 	fz_clear_buffer
 	fz_append_buffer
+	fz_append_base64
+	fz_append_base64_buffer
 	fz_append_data
 	fz_append_string
 	fz_append_byte
@@ -309,6 +316,7 @@ EXPORTS
 	fz_page_separations
 	fz_page_uses_overprint
 	fz_create_link
+	fz_delete_link
 	fz_process_opened_pages
 
 	fz_open_null_filter
@@ -486,10 +494,12 @@ EXPORTS
 	fz_load_bmp_subimage
 	fz_make_link_dest_none
 	fz_make_link_dest_xyz
-	fz_new_link
+	fz_new_link_of_size
 	fz_keep_link
 	fz_drop_link
 	fz_is_external_link
+	fz_set_link_rect
+	fz_set_link_uri
 	fz_log
 	fz_log_module
 	fz_new_log_for_module
@@ -526,6 +536,7 @@ EXPORTS
 	fz_stream_from_output
 	fz_truncate_output
 	fz_write_data
+	fz_write_buffer
 	fz_write_string
 	fz_write_int32_be
 	fz_write_int32_le
@@ -542,6 +553,8 @@ EXPORTS
 	fz_write_rune
 	fz_write_base64
 	fz_write_base64_buffer
+	fz_write_bits
+	fz_write_bits_sync
 	fz_format_string
 	fz_vsnprintf
 	fz_snprintf
@@ -663,6 +676,16 @@ EXPORTS
 	fz_debug_store
 	fz_defer_reap_start
 	fz_defer_reap_end
+	fz_write_story
+	fz_write_stabilized_story
+	fz_new_story
+	fz_story_warnings
+	fz_place_story
+	fz_draw_story
+	fz_reset_story
+	fz_drop_story
+	fz_story_document
+	fz_story_positions
 	fz_file_exists
 	fz_open_file
 	fz_open_file_w
@@ -706,6 +729,7 @@ EXPORTS
 	fz_strlcat
 	fz_memmem
 	fz_dirname
+	fz_basename
 	fz_urldecode
 	fz_format_output_path
 	fz_cleanname
@@ -798,6 +822,8 @@ EXPORTS
 	fz_new_image_from_svg_xml
 	fz_write_image_as_data_uri
 	fz_write_pixmap_as_data_uri
+	fz_append_image_as_data_uri
+	fz_append_pixmap_as_data_uri
 	fz_new_xhtml_document_from_document
 	fz_new_buffer_from_page_with_format
 
@@ -875,6 +901,7 @@ EXPORTS
 	fz_new_document_writer_of_size
 	fz_parse_xml
 	fz_parse_xml_from_html5
+	fz_keep_xml
 	fz_drop_xml
 	fz_detach_xml
 	fz_xml_root
@@ -887,6 +914,7 @@ EXPORTS
 	fz_xml_att
 	fz_xml_att_alt
 	fz_xml_att_eq
+	fz_xml_add_att
 	fz_xml_text
 	fz_debug_xml
 	fz_xml_find
@@ -895,6 +923,27 @@ EXPORTS
 	fz_xml_find_match
 	fz_xml_find_next_match
 	fz_xml_find_down_match
+	fz_xml_find_dfs
+	fz_xml_find_next_dfs
+	fz_dom_body
+	fz_dom_document_element
+	fz_dom_create_element
+	fz_dom_create_text_node
+	fz_dom_find
+	fz_dom_find_next
+	fz_dom_append_child
+	fz_dom_insert_before
+	fz_dom_insert_after
+	fz_dom_remove
+	fz_dom_clone
+	fz_dom_first_child
+	fz_dom_parent
+	fz_dom_next
+	fz_dom_previous
+	fz_dom_add_attribute
+	fz_dom_remove_attribute
+	fz_dom_attribute
+	fz_dom_get_attribute
 
 ; MuPDF exports
 
@@ -924,8 +973,10 @@ EXPORTS
 	pdf_format_link_uri
 	pdf_parse_link_uri
 	pdf_annot_transform
+	pdf_new_link
 	pdf_create_annot_raw
 	pdf_create_link
+	pdf_delete_link
 	pdf_create_annot
 	pdf_delete_annot
 	pdf_set_annot_popup
@@ -953,6 +1004,7 @@ EXPORTS
 	pdf_annot_ink_list_stroke_count
 	pdf_annot_ink_list_stroke_vertex
 	pdf_set_annot_flags
+	pdf_set_annot_stamp_image
 	pdf_set_annot_rect
 	pdf_set_annot_border
 	pdf_set_annot_opacity
@@ -978,6 +1030,7 @@ EXPORTS
 	pdf_set_annot_line_ending_styles
 	pdf_annot_icon_name
 	pdf_annot_is_open
+	pdf_annot_is_standard_stamp
 	pdf_annot_line
 	pdf_set_annot_line
 	pdf_annot_vertex_count
@@ -1246,6 +1299,7 @@ EXPORTS
 	pdf_is_stream
 	pdf_objcmp
 	pdf_objcmp_resolve
+	pdf_objcmp_deep
 	pdf_name_eq
 	pdf_obj_marked
 	pdf_mark_obj
