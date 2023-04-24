@@ -11,7 +11,7 @@ import os, re
 
 def generateExports(header, exclude=[]):
 	if os.path.isdir(header):
-		return "\n".join([generateExports(os.path.join(header, file), exclude) for file in os.listdir(header)])
+		return "\r\n".join([generateExports(os.path.join(header, file), exclude) for file in os.listdir(header)])
 
 	data = open(header, "r").read()
 	data = re.sub(r"(?sm)^#ifndef NDEBUG\s.*?^#endif", "", data, 0)
@@ -55,7 +55,7 @@ def main():
 	mupdf_exports = generateExports("include/mupdf/pdf", form_exports + sign_exports + ["pdf_drop_designated_name", "pdf_print_xref", "pdf_recognize", "pdf_resolve_obj", "pdf_open_compressed_stream", "pdf_finish_edit"])
 
 	list = LIBMUPDF_DEF % locals()
-	open("../MuPDFLib/libmupdf.def", "wt").write(list.replace("\n", "\r\n"))
+	open("../MuPDFLib/libmupdf.def", "wt").write(list)
 
 if __name__ == "__main__":
 	main()

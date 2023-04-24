@@ -34,19 +34,29 @@ So you can exclude several huge fonts from the DLL.
 
 1. Use `git pull` command to update the repository.
 
-2. To update source code, tags and submodules, use
+2. To update source code, tags and submodules, use:
 
    ``` bash
    cd mupdf
    git pull origin master --recurse-submodules
-   git checkout <TAG>
    ```
 
-   To discard local modifications when updating submodules, use the following command before `pull`ing from master
+   It is possible that local modifications have been made. To discard local modifications when updating submodules, use the following command before `pull`ing from master:
 
    ``` bash
    git reset --hard --recurse-submodules origin/master
    git reset --hard --recurse-submodules <TAG>
+   ```
+
+   To fetch remote tags, use:
+
+   ``` bash
+   git fetch origin --tags
+   ```
+
+   Afterwards, it is possible to check out the newly added tags:
+   ``` bash
+   git checkout <TAG>
    ```
 
 3. Check out whether the mupdf has upgraded to a new version. If so, change the FZ_VERSION before compiling the solution after update.
