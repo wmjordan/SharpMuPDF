@@ -1608,6 +1608,7 @@ EXPORTS
 	pdf_metadata
 	pdf_get_populating_xref_entry
 	pdf_get_xref_entry
+	pdf_xref_entry_map
 	pdf_get_xref_entry_no_change
 	pdf_get_xref_entry_no_null
 	pdf_replace_xref

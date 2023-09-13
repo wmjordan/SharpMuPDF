@@ -1,6 +1,6 @@
 # Sharp MuPDF
 
-Sharp MuPDF demonstats how to compile MuPDF source code into a dynamic link library and consume its functionality in .NET.
+Sharp MuPDF demonstrates how to compile MuPDF source code into a dynamic link library and consume its functionality in .NET.
 
 ## Compile
 
