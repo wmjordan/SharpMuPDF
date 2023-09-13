@@ -7,6 +7,7 @@ EXPORTS
 
 	fz_open_archive
 	fz_open_archive_with_stream
+	fz_try_open_archive_with_stream
 	fz_open_directory
 	fz_is_directory
 	fz_drop_archive
@@ -15,7 +16,9 @@ EXPORTS
 	fz_list_archive_entry
 	fz_has_archive_entry
 	fz_open_archive_entry
+	fz_try_open_archive_entry
 	fz_read_archive_entry
+	fz_try_read_archive_entry
 	fz_is_tar_archive
 	fz_open_tar_archive
 	fz_open_tar_archive_with_stream
@@ -109,6 +112,7 @@ EXPORTS
 	fz_colorspace_is_device_cmyk
 	fz_colorspace_is_lab_icc
 	fz_is_valid_blend_colorspace
+	fz_base_colorspace
 	fz_device_gray
 	fz_device_rgb
 	fz_device_bgr
@@ -154,6 +158,9 @@ EXPORTS
 	fz_caught_message
 	fz_caught
 	fz_rethrow_if
+	fz_log_error_printf
+	fz_vlog_error_printf
+	fz_log_error
 	fz_start_throw_on_repair
 	fz_end_throw_on_repair
 	fz_flush_warnings
@@ -275,8 +282,12 @@ EXPORTS
 	fz_bound_display_list
 	fz_new_image_from_display_list
 	fz_display_list_is_empty
+	fz_box_type_from_string
+	fz_string_from_box_type
 	fz_register_document_handler
 	fz_recognize_document
+	fz_recognize_document_content
+	fz_recognize_document_stream_content
 	fz_open_document
 	fz_open_accelerated_document
 	fz_open_document_with_stream
@@ -313,6 +324,7 @@ EXPORTS
 	fz_load_links
 	fz_new_page_of_size
 	fz_bound_page
+	fz_bound_page_box
 	fz_run_page
 	fz_run_page_contents
 	fz_run_page_annots
@@ -661,6 +673,7 @@ EXPORTS
 	fz_separation_name
 	fz_count_separations
 	fz_count_active_separations
+	fz_compare_separations
 	fz_clone_separations_for_overprint
 	fz_convert_separation_colors
 	fz_separation_equivalent
@@ -703,6 +716,7 @@ EXPORTS
 	fz_story_positions
 	fz_file_exists
 	fz_open_file
+	fz_try_open_file
 	fz_open_file_w
 	fz_open_memory
 	fz_open_buffer
@@ -715,6 +729,7 @@ EXPORTS
 	fz_skip
 	fz_read_all
 	fz_read_file
+	fz_try_read_file
 	fz_read_uint16
 	fz_read_uint24
 	fz_read_uint32
@@ -746,6 +761,11 @@ EXPORTS
 	fz_dirname
 	fz_basename
 	fz_urldecode
+	fz_decode_uri
+	fz_decode_uri_component
+	fz_encode_uri
+	fz_encode_uri_component
+	fz_encode_uri_pathname
 	fz_format_output_path
 	fz_cleanname
 	fz_realpath
@@ -819,6 +839,7 @@ EXPORTS
 	fz_new_pixmap_from_page_with_separations
 	fz_new_pixmap_from_page_number_with_separations
 	fz_new_pixmap_from_page_contents_with_separations
+	fz_fill_pixmap_from_display_list
 	fz_new_stext_page_from_page
 	fz_new_stext_page_from_page_number
 	fz_new_stext_page_from_chapter_page_number
@@ -856,7 +877,15 @@ EXPORTS
 	fz_write_pixmap_as_png
 	fz_new_png_band_writer
 	fz_new_buffer_from_image_as_png
+	fz_new_buffer_from_image_as_pnm
+	fz_new_buffer_from_image_as_pam
+	fz_new_buffer_from_image_as_psd
+	fz_new_buffer_from_image_as_jpeg
 	fz_new_buffer_from_pixmap_as_png
+	fz_new_buffer_from_pixmap_as_pnm
+	fz_new_buffer_from_pixmap_as_pam
+	fz_new_buffer_from_pixmap_as_psd
+	fz_new_buffer_from_pixmap_as_jpeg
 	fz_save_pixmap_as_pnm
 	fz_write_pixmap_as_pnm
 	fz_new_pnm_band_writer
@@ -917,6 +946,9 @@ EXPORTS
 	fz_new_pixmap_writer
 	fz_new_document_writer_of_size
 	fz_parse_xml
+	fz_parse_xml_stream
+	fz_parse_xml_archive_entry
+	fz_try_parse_xml_archive_entry
 	fz_parse_xml_from_html5
 	fz_keep_xml
 	fz_drop_xml
@@ -941,7 +973,9 @@ EXPORTS
 	fz_xml_find_next_match
 	fz_xml_find_down_match
 	fz_xml_find_dfs
+	fz_xml_find_dfs_top
 	fz_xml_find_next_dfs
+	fz_xml_find_next_dfs_top
 	fz_dom_body
 	fz_dom_document_element
 	fz_dom_create_element
@@ -985,10 +1019,13 @@ EXPORTS
 	pdf_walk_tree
 	pdf_resolve_link
 	pdf_resolve_link_dest
-	pdf_new_destination_from_link
 	pdf_new_action_from_link
-	pdf_format_link_uri
-	pdf_parse_link_uri
+	pdf_new_dest_from_link
+	pdf_new_uri_from_explicit_dest
+	pdf_append_named_dest_to_uri
+	pdf_append_explicit_dest_to_uri
+	pdf_new_uri_from_path_and_named_dest
+	pdf_new_uri_from_path_and_explicit_dest
 	pdf_annot_transform
 	pdf_new_link
 	pdf_create_annot_raw
@@ -1100,8 +1137,6 @@ EXPORTS
 	pdf_get_embedded_file_params
 	pdf_load_embedded_file_contents
 	pdf_verify_embedded_file_checksum
-	pdf_parse_link_dest
-	pdf_parse_link_action
 	pdf_lookup_dest
 	pdf_load_link_annots
 	pdf_annot_MK_BG
@@ -1120,6 +1155,7 @@ EXPORTS
 	pdf_set_annot_filespec
 	pdf_annot_hidden_for_editing
 	pdf_set_annot_hidden_for_editing
+	pdf_apply_redaction
 	pdf_clean_file
 	pdf_new_cmap
 	pdf_keep_cmap
@@ -1227,6 +1263,7 @@ EXPORTS
 	pdf_save_journal
 	pdf_load_journal
 	pdf_read_journal
+	pdf_minimize_document
 	pdf_access_exec_menu_item_event
 	pdf_load_encoding
 	pdf_set_font_wmode
@@ -1329,6 +1366,7 @@ EXPORTS
 	pdf_deep_copy_obj
 	pdf_keep_obj
 	pdf_drop_obj
+	pdf_drop_singleton_obj
 	pdf_is_null
 	pdf_is_bool
 	pdf_is_int
@@ -1396,6 +1434,7 @@ EXPORTS
 	pdf_dict_getsa
 	pdf_dict_get_inheritable
 	pdf_dict_getp_inheritable
+	pdf_dict_gets_inheritable
 	pdf_dict_put
 	pdf_dict_put_drop
 	pdf_dict_get_put_drop
@@ -1471,6 +1510,7 @@ EXPORTS
 	pdf_begin_operation
 	pdf_begin_implicit_operation
 	pdf_end_operation
+	pdf_abandon_operation
 	pdf_undoredo_state
 	pdf_undoredo_step
 	pdf_can_undo
@@ -1491,13 +1531,14 @@ EXPORTS
 	pdf_load_page_tree
 	pdf_drop_page_tree
 	pdf_drop_page_tree_internal
-	pdf_lookup_anchor
 	pdf_flatten_inheritable_page_items
 	pdf_load_page
 	pdf_load_page_imp
 	pdf_page_has_transparency
 	pdf_page_obj_transform
 	pdf_page_transform
+	pdf_page_obj_transform_box
+	pdf_page_transform_box
 	pdf_page_resources
 	pdf_page_contents
 	pdf_page_group
