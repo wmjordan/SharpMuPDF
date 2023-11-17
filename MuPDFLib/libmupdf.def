@@ -747,6 +747,9 @@ EXPORTS
 	fz_read_float_le
 	fz_read_float
 	fz_read_string
+	fz_read_rune
+	fz_read_utf16_le
+	fz_read_utf16_be
 	fz_new_stream
 	fz_read_best
 	fz_read_line
@@ -1157,6 +1160,7 @@ EXPORTS
 	pdf_set_annot_hidden_for_editing
 	pdf_apply_redaction
 	pdf_clean_file
+	pdf_rearrange_pages
 	pdf_new_cmap
 	pdf_keep_cmap
 	pdf_drop_cmap
