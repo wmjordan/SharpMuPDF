@@ -44,6 +44,14 @@ EXPORTS
 
 %(jbig2_exports)s
 
+; Leptonica exports
+
+%(leptonica_exports)s
+
+; Tesseract exports
+
+%(tesseract_exports)s
+
 """
 
 def main():
@@ -56,10 +64,13 @@ def main():
 	misc_exports = collectFunctions("source/fitz/test-device.c") + ["fz_set_stderr", "fz_set_stdout", "fz_colorspace_name_process_colorants", "fz_getoptw", "fz_valgrind_pixmap", "fz_stderr", "track_usage", "fz_log_errorFL", "fz_log_error_printfFL", "fz_morph_errorFL", "fz_rethrowFL", "fz_rethrow_ifFL", "fz_throwFL", "fz_vlog_error_printfFL", "fz_vthrowFL", "fz_vwarnFL", "fz_warnFL"]
 	sign_exports = ["pdf_crypt_buffer", "pdf_read_pfx", "pdf_sign_signature", "pdf_signer_designated_name", "pdf_free_designated_name"]
 	jbig2_exclude = collectFunctions("thirdparty/jbig2dec/jbig2_image_rw.h") + ["jbig2_dump_huffman_binary", "jbig2_dump_huffman_state", "jbig2_arith_has_reached_marker"]
+	tesseract_exclude = ["TessBaseAPIInitLangMod", "TessBaseAPIClearAdaptiveClassifier", "TessBaseAPIAdaptToWordStr"]
 
 	fitz_exports = generateExports("include/mupdf/fitz", doc_exports + more_formats + misc_exports)
 	mupdf_exports = generateExports("include/mupdf/pdf", form_exports + sign_exports + ["pdf_drop_designated_name", "pdf_print_xref", "pdf_recognize", "pdf_resolve_obj", "pdf_open_compressed_stream", "pdf_finish_edit"])
 	jbig2_exports = generateExports("thirdparty/jbig2dec", jbig2_exclude, "/jbig2*.h")
+	leptonica_exports = generateExports("thirdparty/leptonica/src", [], "/allheaders.h")
+	tesseract_exports = generateExports("thirdparty/tesseract/include/tesseract", tesseract_exclude, "/capi.h")
 
 	list = LIBMUPDF_DEF % locals()
 	open("../MuPDFLib/libmupdf.def", "wt").write(list.replace('\r\n', "\n"))

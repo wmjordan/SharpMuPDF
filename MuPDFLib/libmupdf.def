@@ -623,6 +623,7 @@ EXPORTS
 	fz_pixmap_height
 	fz_pixmap_x
 	fz_pixmap_y
+	fz_pixmap_size
 	fz_new_pixmap
 	fz_new_pixmap_with_bbox
 	fz_new_pixmap_with_data
@@ -658,6 +659,9 @@ EXPORTS
 	fz_clone_pixmap_area_with_different_seps
 	fz_new_pixmap_from_alpha_channel
 	fz_new_pixmap_from_color_and_mask
+	fz_scale_pixmap
+	fz_subsample_pixmap
+	fz_copy_pixmap_rect
 	fz_new_pool
 	fz_pool_alloc
 	fz_pool_strdup
@@ -821,6 +825,7 @@ EXPORTS
 	fz_keep_text
 	fz_drop_text
 	fz_show_glyph
+	fz_show_glyph_aux
 	fz_show_string
 	fz_bound_text
 	fz_text_language_from_string
@@ -876,6 +881,7 @@ EXPORTS
 	fz_write_pixmap_as_pdfocr
 	fz_save_pixmap_as_pdfocr
 	fz_save_pixmap_as_png
+	fz_write_pixmap_as_jpeg
 	fz_save_pixmap_as_jpeg
 	fz_write_pixmap_as_png
 	fz_new_png_band_writer
@@ -1532,6 +1538,7 @@ EXPORTS
 	pdf_count_pages
 	pdf_count_pages_imp
 	pdf_lookup_page_obj
+	pdf_lookup_page_loc
 	pdf_load_page_tree
 	pdf_drop_page_tree
 	pdf_drop_page_tree_internal
@@ -1766,4 +1773,78 @@ EXPORTS
 	jbig2_sd_cat
 	jbig2_sd_count_referred
 	jbig2_text_region
+
+; Leptonica exports
+
+
+
+; Tesseract exports
+
+	TessDeleteText
+	TessDeleteTextArray
+	TessDeleteIntArray
+	TessDeleteResultRenderer
+	TessResultRendererInsert
+	TessResultRendererBeginDocument
+	TessResultRendererAddImage
+	TessResultRendererEndDocument
+	TessResultRendererImageNum
+	TessBaseAPIDelete
+	TessBaseAPIGetOpenCLDevice
+	TessBaseAPISetInputName
+	TessBaseAPISetInputImage
+	TessBaseAPIGetSourceYResolution
+	TessBaseAPISetOutputName
+	TessBaseAPISetVariable
+	TessBaseAPISetDebugVariable
+	TessBaseAPIGetIntVariable
+	TessBaseAPIGetBoolVariable
+	TessBaseAPIGetDoubleVariable
+	TessBaseAPIPrintVariables
+	TessBaseAPIPrintVariablesToFile
+	TessBaseAPIInit1
+	TessBaseAPIInit2
+	TessBaseAPIInit3
+	TessBaseAPIInit4
+	TessBaseAPIInitForAnalysePage
+	TessBaseAPIReadConfigFile
+	TessBaseAPIReadDebugConfigFile
+	TessBaseAPISetPageSegMode
+	TessBaseAPIGetPageSegMode
+	TessBaseAPISetImage
+	TessBaseAPISetImage2
+	TessBaseAPISetSourceResolution
+	TessBaseAPISetRectangle
+	TessBaseAPIGetThresholdedImageScaleFactor
+	TessBaseAPIRecognize
+	TessBaseAPIProcessPages
+	TessBaseAPIProcessPage
+	TessBaseAPIMeanTextConf
+	TessBaseAPIClear
+	TessBaseAPIEnd
+	TessBaseAPIIsValidWord
+	TessBaseAPIGetTextDirection
+	TessBaseAPISetMinOrientationMargin
+	TessPageIteratorDelete
+	TessPageIteratorBegin
+	TessPageIteratorNext
+	TessPageIteratorIsAtBeginningOf
+	TessPageIteratorIsAtFinalElement
+	TessPageIteratorBoundingBox
+	TessPageIteratorBaseline
+	TessPageIteratorOrientation
+	TessPageIteratorParagraphInfo
+	TessResultIteratorDelete
+	TessResultIteratorNext
+	TessResultIteratorConfidence
+	TessResultIteratorWordIsNumeric
+	TessChoiceIteratorDelete
+	TessChoiceIteratorNext
+	TessChoiceIteratorConfidence
+	TessMonitorDelete
+	TessMonitorSetCancelFunc
+	TessMonitorSetCancelThis
+	TessMonitorSetProgressFunc
+	TessMonitorGetProgress
+	TessMonitorSetDeadlineMSecs
 
