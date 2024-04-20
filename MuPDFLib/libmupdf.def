@@ -20,8 +20,14 @@ EXPORTS
 	fz_read_archive_entry
 	fz_try_read_archive_entry
 	fz_is_tar_archive
+	fz_is_libarchive_archive
+	fz_is_cfb_archive
 	fz_open_tar_archive
 	fz_open_tar_archive_with_stream
+	fz_open_libarchive_archive
+	fz_open_libarchive_archive_with_stream
+	fz_open_cfb_archive
+	fz_open_cfb_archive_with_stream
 	fz_is_zip_archive
 	fz_open_zip_archive
 	fz_open_zip_archive_with_stream
@@ -35,6 +41,7 @@ EXPORTS
 	fz_tree_archive_add_data
 	fz_new_multi_archive
 	fz_mount_multi_archive
+	fz_register_archive_handler
 	fz_new_archive_of_size
 	fz_write_header
 	fz_write_band
@@ -44,6 +51,7 @@ EXPORTS
 	fz_bidi_fragment_text
 	fz_keep_bitmap
 	fz_drop_bitmap
+	fz_invert_bitmap
 	fz_new_bitmap_from_pixmap
 	fz_new_bitmap_from_pixmap_band
 	fz_new_bitmap
@@ -140,6 +148,7 @@ EXPORTS
 	fz_new_deflated_data_from_buffer
 	fz_compress_ccitt_fax_g3
 	fz_compress_ccitt_fax_g4
+	fz_keep_compressed_buffer
 	fz_compressed_buffer_size
 	fz_open_compressed_buffer
 	fz_open_image_decomp_stream_from_buffer
@@ -148,6 +157,7 @@ EXPORTS
 	fz_image_type_name
 	fz_lookup_image_type
 	fz_drop_compressed_buffer
+	fz_new_compressed_buffer
 
 	fz_vthrow
 	fz_throw
@@ -157,12 +167,17 @@ EXPORTS
 	fz_warn
 	fz_caught_message
 	fz_caught
+	fz_caught_errno
 	fz_rethrow_if
+	fz_rethrow_unless
 	fz_log_error_printf
 	fz_vlog_error_printf
 	fz_log_error
 	fz_start_throw_on_repair
 	fz_end_throw_on_repair
+	fz_report_error
+	fz_ignore_error
+	fz_convert_error
 	fz_flush_warnings
 	fz_clone_context
 	fz_drop_context
@@ -199,11 +214,13 @@ EXPORTS
 	fz_realloc_no_throw
 	fz_strdup
 	fz_memrnd
+	fz_new_string
+	fz_keep_string
+	fz_drop_string
 	fz_var_imp
 	fz_push_try
 	fz_do_try
 	fz_do_always
-	fz_do_catch
 	fz_new_context_imp
 	fz_md5_init
 	fz_md5_update
@@ -226,6 +243,11 @@ EXPORTS
 	fz_aes_crypt_cbc
 	fz_lookup_blendmode
 	fz_blendmode_name
+	fz_new_function_of_size
+	fz_eval_function
+	fz_keep_function
+	fz_drop_function
+	fz_function_size
 	fz_structure_to_string
 	fz_structure_from_string
 	fz_fill_path
@@ -244,6 +266,7 @@ EXPORTS
 	fz_clip_image_mask
 	fz_begin_mask
 	fz_end_mask
+	fz_end_mask_tr
 	fz_begin_group
 	fz_end_group
 	fz_begin_tile
@@ -288,11 +311,14 @@ EXPORTS
 	fz_recognize_document
 	fz_recognize_document_content
 	fz_recognize_document_stream_content
+	fz_recognize_document_stream_and_dir_content
 	fz_open_document
 	fz_open_accelerated_document
 	fz_open_document_with_stream
+	fz_open_document_with_stream_and_dir
 	fz_open_document_with_buffer
 	fz_open_accelerated_document_with_stream
+	fz_open_accelerated_document_with_stream_and_dir
 	fz_document_supports_accelerator
 	fz_save_accelerator
 	fz_output_accelerator
@@ -311,6 +337,7 @@ EXPORTS
 	fz_resolve_link_dest
 	fz_format_link_uri
 	fz_resolve_link
+	fz_run_document_structure
 	fz_last_page
 	fz_next_page
 	fz_previous_page
@@ -357,6 +384,7 @@ EXPORTS
 	fz_open_dctd
 	fz_open_faxd
 	fz_open_flated
+	fz_open_libarchived
 	fz_open_lzwd
 	fz_open_predict
 	fz_open_jbig2d
@@ -377,6 +405,7 @@ EXPORTS
 	fz_unicode_from_glyph_name
 	fz_unicode_from_glyph_name_strict
 	fz_glyph_name_from_unicode_sc
+	fz_init_text_decoder
 	fz_font_ft_face
 	fz_font_flags
 	fz_font_shaper_data
@@ -420,6 +449,12 @@ EXPORTS
 	ft_name_index
 	fz_hb_lock
 	fz_hb_unlock
+	fz_ft_lock
+	fz_ft_unlock
+	fz_ft_lock_held
+	fz_extract_ttf_from_ttc
+	fz_subset_ttf_for_gids
+	fz_subset_cff_for_gids
 	fz_atof
 	fz_atoi
 	fz_atoi64
@@ -465,7 +500,9 @@ EXPORTS
 	fz_is_point_inside_irect
 	fz_is_quad_inside_quad
 	fz_is_quad_intersecting_quad
+	fz_getopt_long
 	fz_getopt
+	fz_opt_from_list
 	fz_purge_glyph_cache
 	fz_render_glyph_pixmap
 	fz_render_t3_glyph_direct
@@ -486,6 +523,8 @@ EXPORTS
 	fz_hash_remove
 	fz_hash_for_each
 	fz_hash_filter
+
+
 	fz_get_pixmap_from_image
 	fz_get_unscaled_pixmap_from_image
 	fz_keep_image
@@ -503,6 +542,7 @@ EXPORTS
 	fz_convert_indexed_pixmap_to_base
 	fz_convert_separation_pixmap_to_base
 	fz_image_size
+	fz_compressed_image_type
 	fz_image_resolution
 	fz_image_orientation
 	fz_compressed_image_buffer
@@ -510,6 +550,8 @@ EXPORTS
 	fz_pixmap_image_tile
 	fz_set_pixmap_image_tile
 	fz_load_jpx
+	opj_lock
+	opj_unlock
 	fz_load_tiff_subimage_count
 	fz_load_tiff_subimage
 	fz_load_pnm_subimage_count
@@ -713,6 +755,7 @@ EXPORTS
 	fz_new_story
 	fz_story_warnings
 	fz_place_story
+	fz_place_story_flags
 	fz_draw_story
 	fz_reset_story
 	fz_drop_story
@@ -775,6 +818,7 @@ EXPORTS
 	fz_encode_uri_pathname
 	fz_format_output_path
 	fz_cleanname
+	fz_cleanname_strdup
 	fz_realpath
 	fz_strcasecmp
 	fz_strncasecmp
@@ -784,6 +828,7 @@ EXPORTS
 	fz_runeidx
 	fz_runeptr
 	fz_utflen
+	fz_utf8_from_wchar
 	fz_strtof
 	fz_grisu
 	fz_is_page_range
@@ -814,13 +859,12 @@ EXPORTS
 	fz_new_stext_device
 	fz_new_ocr_device
 	fz_open_reflowed_document
-	fz_utf8_from_wchar
-	fz_wchar_from_utf8
 	fz_fopen_utf8
 	fz_remove_utf8
 	fz_free_argv
 	fz_stat_ctime
 	fz_stat_mtime
+	fz_mkdir
 	fz_new_text
 	fz_keep_text
 	fz_drop_text
@@ -884,17 +928,21 @@ EXPORTS
 	fz_write_pixmap_as_jpeg
 	fz_save_pixmap_as_jpeg
 	fz_write_pixmap_as_png
+	fz_write_pixmap_as_jpx
+	fz_save_pixmap_as_jpx
 	fz_new_png_band_writer
 	fz_new_buffer_from_image_as_png
 	fz_new_buffer_from_image_as_pnm
 	fz_new_buffer_from_image_as_pam
 	fz_new_buffer_from_image_as_psd
 	fz_new_buffer_from_image_as_jpeg
+	fz_new_buffer_from_image_as_jpx
 	fz_new_buffer_from_pixmap_as_png
 	fz_new_buffer_from_pixmap_as_pnm
 	fz_new_buffer_from_pixmap_as_pam
 	fz_new_buffer_from_pixmap_as_psd
 	fz_new_buffer_from_pixmap_as_jpeg
+	fz_new_buffer_from_pixmap_as_jpx
 	fz_save_pixmap_as_pnm
 	fz_write_pixmap_as_pnm
 	fz_new_pnm_band_writer
@@ -974,6 +1022,7 @@ EXPORTS
 	fz_xml_att_eq
 	fz_xml_add_att
 	fz_xml_text
+	fz_output_xml
 	fz_debug_xml
 	fz_xml_find
 	fz_xml_find_next
@@ -1051,6 +1100,7 @@ EXPORTS
 	pdf_annot_has_line
 	pdf_annot_has_interior_color
 	pdf_annot_has_line_ending_styles
+	pdf_annot_has_quadding
 	pdf_annot_has_border
 	pdf_annot_has_border_effect
 	pdf_annot_has_icon_name
@@ -1129,6 +1179,7 @@ EXPORTS
 	pdf_print_default_appearance
 	pdf_annot_default_appearance
 	pdf_set_annot_default_appearance
+	pdf_annot_request_synthesis
 	pdf_annot_request_resynthesis
 	pdf_annot_needs_resynthesis
 	pdf_set_annot_resynthesised
@@ -1274,6 +1325,8 @@ EXPORTS
 	pdf_load_journal
 	pdf_read_journal
 	pdf_minimize_document
+	pdf_structure_type
+	pdf_run_document_structure
 	pdf_access_exec_menu_item_event
 	pdf_load_encoding
 	pdf_set_font_wmode
@@ -1302,7 +1355,7 @@ EXPORTS
 	pdf_add_cjk_font
 	pdf_add_substitute_font
 	pdf_font_writing_supported
-	fz_extract_ttf_from_ttc
+	pdf_subset_fonts
 	pdf_widget_type
 	pdf_choice_field_option
 	pdf_field_type_string
@@ -1321,13 +1374,14 @@ EXPORTS
 	pdf_sign_signature_with_appearance
 	pdf_preview_signature_as_display_list
 	pdf_preview_signature_as_pixmap
-	pdf_check_signature
 	pdf_drop_signer
 	pdf_drop_verifier
+	pdf_rewrite_images
 	pdf_new_processor
 	pdf_keep_processor
 	pdf_close_processor
 	pdf_drop_processor
+	pdf_count_q_balance
 	pdf_new_run_processor
 	pdf_new_buffer_processor
 	pdf_new_output_processor
@@ -1403,6 +1457,7 @@ EXPORTS
 	pdf_mark_bits_set
 	pdf_mark_list_push
 	pdf_mark_list_pop
+	pdf_mark_list_check
 	pdf_mark_list_init
 	pdf_mark_list_free
 	pdf_set_obj_memo
@@ -1421,6 +1476,9 @@ EXPORTS
 	pdf_to_str_len
 	pdf_to_num
 	pdf_to_gen
+	pdf_to_bool_default
+	pdf_to_int_default
+	pdf_to_real_default
 	pdf_array_len
 	pdf_array_get
 	pdf_array_put
@@ -1479,6 +1537,19 @@ EXPORTS
 	pdf_dict_get_rect
 	pdf_dict_get_matrix
 	pdf_dict_get_date
+	pdf_dict_get_bool_default
+	pdf_dict_get_int_default
+	pdf_dict_get_real_default
+	pdf_dict_get_inheritable_bool
+	pdf_dict_get_inheritable_int
+	pdf_dict_get_inheritable_int64
+	pdf_dict_get_inheritable_real
+	pdf_dict_get_inheritable_name
+	pdf_dict_get_inheritable_string
+	pdf_dict_get_inheritable_text_string
+	pdf_dict_get_inheritable_rect
+	pdf_dict_get_inheritable_matrix
+	pdf_dict_get_inheritable_date
 	pdf_array_push_bool
 	pdf_array_push_int
 	pdf_array_push_real
@@ -1487,6 +1558,14 @@ EXPORTS
 	pdf_array_push_text_string
 	pdf_array_push_array
 	pdf_array_push_dict
+	pdf_array_put_bool
+	pdf_array_put_int
+	pdf_array_put_real
+	pdf_array_put_name
+	pdf_array_put_string
+	pdf_array_put_text_string
+	pdf_array_put_array
+	pdf_array_put_dict
 	pdf_array_get_bool
 	pdf_array_get_int
 	pdf_array_get_real
@@ -1534,6 +1613,8 @@ EXPORTS
 	pdf_add_journal_fragment
 	pdf_format_date
 	pdf_parse_date
+	pdf_keep_page
+	pdf_drop_page
 	pdf_lookup_page_number
 	pdf_count_pages
 	pdf_count_pages_imp
@@ -1546,13 +1627,14 @@ EXPORTS
 	pdf_load_page
 	pdf_load_page_imp
 	pdf_page_has_transparency
-	pdf_page_obj_transform
-	pdf_page_transform
 	pdf_page_obj_transform_box
+	pdf_page_obj_transform
 	pdf_page_transform_box
+	pdf_page_transform
 	pdf_page_resources
 	pdf_page_contents
 	pdf_page_group
+	pdf_set_page_box
 	pdf_page_separations
 	pdf_read_ocg
 	pdf_drop_ocg
@@ -1783,12 +1865,24 @@ EXPORTS
 	TessDeleteText
 	TessDeleteTextArray
 	TessDeleteIntArray
+	TessTextRendererCreate
+	TessHOcrRendererCreate
+	TessHOcrRendererCreate2
+	TessAltoRendererCreate
+	TessTsvRendererCreate
+	TessPDFRendererCreate
+	TessUnlvRendererCreate
+	TessBoxTextRendererCreate
+	TessLSTMBoxRendererCreate
+	TessWordStrBoxRendererCreate
 	TessDeleteResultRenderer
 	TessResultRendererInsert
+	TessResultRendererNext
 	TessResultRendererBeginDocument
 	TessResultRendererAddImage
 	TessResultRendererEndDocument
 	TessResultRendererImageNum
+	TessBaseAPICreate
 	TessBaseAPIDelete
 	TessBaseAPIGetOpenCLDevice
 	TessBaseAPISetInputName
@@ -1806,26 +1900,45 @@ EXPORTS
 	TessBaseAPIInit2
 	TessBaseAPIInit3
 	TessBaseAPIInit4
+	TessBaseAPIInit5
 	TessBaseAPIInitForAnalysePage
 	TessBaseAPIReadConfigFile
 	TessBaseAPIReadDebugConfigFile
 	TessBaseAPISetPageSegMode
 	TessBaseAPIGetPageSegMode
+	TessBaseAPIRect
 	TessBaseAPISetImage
 	TessBaseAPISetImage2
 	TessBaseAPISetSourceResolution
 	TessBaseAPISetRectangle
 	TessBaseAPIGetThresholdedImageScaleFactor
+	TessBaseAPIAnalyseLayout
 	TessBaseAPIRecognize
 	TessBaseAPIProcessPages
 	TessBaseAPIProcessPage
+	TessBaseAPIGetIterator
+	TessBaseAPIGetMutableIterator
+	TessBaseAPIGetUTF8Text
+	TessBaseAPIGetHOCRText
+	TessBaseAPIGetAltoText
+	TessBaseAPIGetTsvText
+	TessBaseAPIGetBoxText
+	TessBaseAPIGetLSTMBoxText
+	TessBaseAPIGetWordStrBoxText
+	TessBaseAPIGetUNLVText
 	TessBaseAPIMeanTextConf
+	TessBaseAPIAllWordConfidences
 	TessBaseAPIClear
 	TessBaseAPIEnd
 	TessBaseAPIIsValidWord
 	TessBaseAPIGetTextDirection
+	TessBaseAPIClearPersistentCache
 	TessBaseAPISetMinOrientationMargin
+	TessBaseAPINumDawgs
+	TessBaseAPIOem
+	TessBaseGetBlockTextOrientations
 	TessPageIteratorDelete
+	TessPageIteratorCopy
 	TessPageIteratorBegin
 	TessPageIteratorNext
 	TessPageIteratorIsAtBeginningOf
@@ -1835,15 +1948,21 @@ EXPORTS
 	TessPageIteratorOrientation
 	TessPageIteratorParagraphInfo
 	TessResultIteratorDelete
+	TessResultIteratorCopy
+	TessResultIteratorGetPageIterator
+	TessResultIteratorGetChoiceIterator
 	TessResultIteratorNext
+	TessResultIteratorGetUTF8Text
 	TessResultIteratorConfidence
 	TessResultIteratorWordIsNumeric
 	TessChoiceIteratorDelete
 	TessChoiceIteratorNext
 	TessChoiceIteratorConfidence
+	TessMonitorCreate
 	TessMonitorDelete
 	TessMonitorSetCancelFunc
 	TessMonitorSetCancelThis
+	TessMonitorGetCancelThis
 	TessMonitorSetProgressFunc
 	TessMonitorGetProgress
 	TessMonitorSetDeadlineMSecs

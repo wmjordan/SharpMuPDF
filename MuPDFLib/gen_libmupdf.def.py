@@ -61,10 +61,10 @@ def main():
 	doc_exports = collectFunctions("source/fitz/document-all.c") + ["fz_get_annot_type", "fz_log_dump_store","fz_outline_from_iterator"]
 	more_formats = collectFunctions("source/fitz/svg-device.c") + collectFunctions("source/fitz/output-pcl.c") + collectFunctions("source/fitz/output-pwg.c")
 	form_exports = collectFunctions("source/pdf/pdf-form.c") + collectFunctions("source/pdf/pdf-event.c") + collectFunctions("source/pdf/pdf-appearance.c") + ["pdf_access_submit_event", "pdf_init_ui_pointer_event"]
-	misc_exports = collectFunctions("source/fitz/test-device.c") + ["fz_set_stderr", "fz_set_stdout", "fz_colorspace_name_process_colorants", "fz_getoptw", "fz_valgrind_pixmap", "fz_stderr", "track_usage", "fz_log_errorFL", "fz_log_error_printfFL", "fz_morph_errorFL", "fz_rethrowFL", "fz_rethrow_ifFL", "fz_throwFL", "fz_vlog_error_printfFL", "fz_vthrowFL", "fz_vwarnFL", "fz_warnFL"]
+	misc_exports = collectFunctions("source/fitz/test-device.c") + ["fz_set_stderr", "fz_set_stdout", "fz_colorspace_name_process_colorants", "fz_getoptw", "fz_valgrind_pixmap", "fz_stderr", "track_usage", "fz_log_errorFL", "fz_log_error_printfFL", "fz_morph_errorFL", "fz_do_catchFL", "fz_rethrowFL", "fz_rethrow_ifFL", "fz_rethrow_unlessFL", "fz_throwFL", "fz_vlog_error_printfFL", "fz_vthrowFL", "fz_vwarnFL", "fz_warnFL", "HEAP_CAT"]
 	sign_exports = ["pdf_crypt_buffer", "pdf_read_pfx", "pdf_sign_signature", "pdf_signer_designated_name", "pdf_free_designated_name"]
 	jbig2_exclude = collectFunctions("thirdparty/jbig2dec/jbig2_image_rw.h") + ["jbig2_dump_huffman_binary", "jbig2_dump_huffman_state", "jbig2_arith_has_reached_marker"]
-	tesseract_exclude = ["TessBaseAPIInitLangMod", "TessBaseAPIClearAdaptiveClassifier", "TessBaseAPIAdaptToWordStr"]
+	tesseract_exclude = ["TessBaseAPIInitLangMod", "TessBaseAPIClearAdaptiveClassifier", "TessBaseAPIAdaptToWordStr", "TessBaseAPIDetectOrientationScript"]
 
 	fitz_exports = generateExports("include/mupdf/fitz", doc_exports + more_formats + misc_exports)
 	mupdf_exports = generateExports("include/mupdf/pdf", form_exports + sign_exports + ["pdf_drop_designated_name", "pdf_print_xref", "pdf_recognize", "pdf_resolve_obj", "pdf_open_compressed_stream", "pdf_finish_edit"])
