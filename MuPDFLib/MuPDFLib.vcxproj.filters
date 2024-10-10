@@ -5,8 +5,100 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{cff1e727-1f49-4fe2-81f6-9c51dc9945ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Document">
+      <UniqueIdentifier>{6731a656-be12-448b-a675-3f03fcf9d394}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendition">
+      <UniqueIdentifier>{89f1a1a3-e1f4-4a18-b67f-48f578532657}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="gen_libmupdf.def.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Context.cpp" />
+    <ClCompile Include="Rendition\Colorspace.cpp">
+      <Filter>Rendition</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendition\Pixmap.cpp">
+      <Filter>Rendition</Filter>
+    </ClCompile>
+    <ClCompile Include="Document\Stream.cpp">
+      <Filter>Document</Filter>
+    </ClCompile>
+    <ClCompile Include="Document\Document.cpp">
+      <Filter>Document</Filter>
+    </ClCompile>
+    <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="Rendition\Device.cpp">
+      <Filter>Rendition</Filter>
+    </ClCompile>
+    <ClCompile Include="Document\Page.cpp">
+      <Filter>Document</Filter>
+    </ClCompile>
+    <ClCompile Include="Document\PdfObject.cpp">
+      <Filter>Document</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendition\TextPage.cpp">
+      <Filter>Rendition</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendition\Geometry.cpp">
+      <Filter>Rendition</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="!Include\MuException.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="!Include\Colorspace.h">
+      <Filter>Rendition</Filter>
+    </ClInclude>
+    <ClInclude Include="!Include\Pixmap.h">
+      <Filter>Rendition</Filter>
+    </ClInclude>
+    <ClInclude Include="!Include\Stream.h">
+      <Filter>Document</Filter>
+    </ClInclude>
+    <ClInclude Include="!Include\Document.h">
+      <Filter>Document</Filter>
+    </ClInclude>
+    <ClInclude Include="!Include\Device.h">
+      <Filter>Rendition</Filter>
+    </ClInclude>
+    <ClInclude Include="!Include\Page.h">
+      <Filter>Document</Filter>
+    </ClInclude>
+    <ClInclude Include="!Include\Geometry.h">
+      <Filter>Rendition</Filter>
+    </ClInclude>
+    <ClInclude Include="!Include\name-table.h">
+      <Filter>Document</Filter>
+    </ClInclude>
+    <ClInclude Include="!Include\MuPDF.h" />
+    <ClInclude Include="!Include\PdfObject.h">
+      <Filter>Document</Filter>
+    </ClInclude>
+    <ClInclude Include="!Include\TextPage.h">
+      <Filter>Rendition</Filter>
+    </ClInclude>
+    <ClInclude Include="!Include\ObjWrapper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="!Include\Collection.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="!Include\Cookie.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Context.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MuPDFLib.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

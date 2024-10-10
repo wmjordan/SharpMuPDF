@@ -30,6 +30,8 @@ Add `;TOFU;TOFU_CJK_EXT` to _C/C++_/_Preprocessor_/_Preprocessor Definitions_ fo
 
 So you can exclude several huge fonts from the DLL.
 
+For more information, see `config.h` file within the `!include/fitz` folder in `libmupdf` project.
+
 ## Update source code
 
 1. Use `git pull` command to update the repository.
@@ -59,7 +61,7 @@ So you can exclude several huge fonts from the DLL.
    git checkout <TAG>
    ```
 
-3. Check out whether the mupdf has upgraded to a new version. If so, change the FZ_VERSION before compiling the solution after update.
+3. The first a few lines in the `name-table.h` file have slight modifications from the original one in the `libmupdf` project, for the sake of making field names valid in .NET. Check whether it is changed and make the corresponding synchronization.
 
 ## Git Proxy
 If accessing the Internet requires HTTPS proxy, use the following command:
