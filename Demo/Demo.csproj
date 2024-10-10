@@ -53,6 +53,13 @@
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
@@ -60,7 +67,6 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Structures.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -69,14 +75,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\Release\MuPDFLib.dll" Condition="'$(Platform)' == 'x86'">
-      <Link>MuPDFLib.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\x64\Release\MuPDFLib.dll" Condition="'$(Platform)' == 'x64'">
-      <Link>MuPDFLib.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <ProjectReference Include="..\MuPDFLib\MuPDFLib.vcxproj">
+      <Project>{7ac327e2-05d5-4acc-9400-c78c183de505}</Project>
+      <Name>MuPDFLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
