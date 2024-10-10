@@ -61,7 +61,31 @@ For more information, see `config.h` file within the `!include/fitz` folder in `
    git checkout <TAG>
    ```
 
-3. The first a few lines in the `name-table.h` file have slight modifications from the original one in the `libmupdf` project, for the sake of making field names valid in .NET. Check whether it is changed and make the corresponding synchronization.
+   Alternatively, we can also execute the following commands against each changed files:
+
+   ``` bash
+   git reset HEAD <file name>
+   git checkout -- <file name>
+   ```
+
+   We may see the following warning when we `pull` from master:
+
+   ```
+	error: You have not concluded your merge (MERGE_HEAD exists).
+	hint: Please, commit your changes before merging.
+    fatal: Exiting because of unfinished merge.
+   ```
+
+   To fix this, run the following commands:
+
+   ``` bash
+   git fetch --all
+   git reset --hard origin/master
+   ```
+
+   Afterwards, we can `pull` from master then.
+
+3. The first a few lines in the `name-table.h` file have slight modifications from the original one in the `libmupdf` project, for the sake of making field names valid in .NET. Check whether it is changed and make the corresponding synchronization. To facilitate this operation, run the `sync_name_table.py` script within the `MuPDFLib` project folder.
 
 ## Git Proxy
 If accessing the Internet requires HTTPS proxy, use the following command:
