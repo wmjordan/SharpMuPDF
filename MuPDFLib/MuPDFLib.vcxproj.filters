@@ -17,6 +17,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="gen_libmupdf.def.py" />
+    <None Include="sync_name_table.py" />
+    <None Include="version.py" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Context.cpp" />

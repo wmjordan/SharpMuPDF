@@ -1,3 +1,6 @@
+#ifndef __OBJWRAPPER
+#define __OBJWRAPPER
+
 #pragma once
 
 #define GcnewArray(TManage, var, Length) array<TManage>^ var = gcnew array<TManage>(Length);
@@ -22,6 +25,7 @@
 			return (p = dynamic_cast<TManage^>(obj)) && OPtr == p->OPtr; \
 		} \
 		virtual int GetHashCode() override { \
-			return (int)OPtr; \
+			return (int)(IntPtr)OPtr; \
 		}
-	
+
+#endif // !__OBJWRAPPER

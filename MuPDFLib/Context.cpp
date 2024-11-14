@@ -95,45 +95,6 @@ MuPDF::Document^ MuPDF::Context::OpenDocument(String^ filePath) {
 	}
 }
 
-void MuPDF::Context::InstallLoadSystemFontFuncs(FzLoadSystemFont^ loadSystemFont, FzLoadSystemCjkFont^ loadSystemCjkFont, FzLoadSystemFallbackFont^ loadSystemFallbackFont) {
-	fz_load_system_font_fn* fn_sf;
-	fz_load_system_cjk_font_fn* fn_cjk;
-	fz_load_system_fallback_font_fn* fn_fallback;
-
-	GCHandle f, f_cjk, f_fallback;
-	if (loadSystemFont) {
-		f = GCHandle::Alloc(loadSystemFont);
-		fn_sf = static_cast<fz_load_system_font_fn*>(Marshal::GetFunctionPointerForDelegate(loadSystemFont).ToPointer());
-	}
-	else {
-		fn_sf = NULL;
-	}
-	if (loadSystemCjkFont) {
-		f_cjk = GCHandle::Alloc(loadSystemCjkFont);
-		fn_cjk = static_cast<fz_load_system_cjk_font_fn*>(Marshal::GetFunctionPointerForDelegate(loadSystemCjkFont).ToPointer());
-	}
-	else {
-		fn_cjk = NULL;
-	}
-	if (loadSystemFallbackFont) {
-		f_fallback = GCHandle::Alloc(loadSystemFallbackFont);
-		fn_fallback = static_cast<fz_load_system_fallback_font_fn*>(Marshal::GetFunctionPointerForDelegate(loadSystemFallbackFont).ToPointer());
-	}
-	else {
-		fn_fallback = NULL;
-	}
-	fz_install_load_system_font_funcs(_context, fn_sf, fn_cjk, fn_fallback);
-	if (f.IsAllocated) {
-		f.Free();
-	}
-	if (f_cjk.IsAllocated) {
-		f_cjk.Free();
-	}
-	if (f_fallback.IsAllocated) {
-		f_fallback.Free();
-	}
-}
-
 MuPDF::Colorspace^ MuPDF::Context::GetColorspace(ColorspaceKind kind) {
 	return gcnew Colorspace(GetFzColorspace(kind));
 }

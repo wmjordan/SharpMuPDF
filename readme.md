@@ -20,9 +20,17 @@ To compile the source code.
 
    `MuPDFLib` project will produce two DLL files for mupdf, one for x86 and the other for x64.
 
-   `Demo` project contains some code to demonstrate how to use functions in mupdflib.dll
+   `Demo` project contains some code to demonstrate how to use functions in MuPDFLib.dll
 
-## Shrinking MuPDF.dll
+## System font loading
+
+In order to support loading system fonts for documents with unembedded fonts and avoid the performance lost across DLL files, a code file named `mupdf_load_system_font.c` shall be compiled with the `libmupdf` project.
+
+We have to modify that project and reference the code file from `MuPDFLib\Document\mupdf_load_system_font.c`.
+
+That code file is copied from project *SumatraPDF* and all credits goes to them.
+
+## Shrinking MuPDFLib.dll
 
 Open the property page for the `libmupdf` project.
 
@@ -31,6 +39,14 @@ Add `;TOFU;TOFU_CJK_EXT` to _C/C++_/_Preprocessor_/_Preprocessor Definitions_ fo
 So you can exclude several huge fonts from the DLL.
 
 For more information, see `config.h` file within the `!include/fitz` folder in `libmupdf` project.
+
+## .NET assembly reference of MuPDFLib.dll
+
+From version 2.* on, it is possible to reference MuPDFLib.dll as a .NET assembly, since it is compiled with C++/CLI.
+
+If you redistribute the MuPDFLib.dll which is referenced as a .NET assembly in your application, your users may encounter a problem that *the MuPDFLib.dll could not be loaded*.
+
+To fix the problem, enclose the Visual C++ Runtime library files with your redistribution. At least, `vcruntime140.dll` and `msvcp140.dll` are the minimum set of required DLL files.
 
 ## Update source code
 
@@ -71,9 +87,9 @@ For more information, see `config.h` file within the `!include/fitz` folder in `
    We may see the following warning when we `pull` from master:
 
    ```
-	error: You have not concluded your merge (MERGE_HEAD exists).
-	hint: Please, commit your changes before merging.
-    fatal: Exiting because of unfinished merge.
+   error: You have not concluded your merge (MERGE_HEAD exists).
+   hint: Please, commit your changes before merging.
+   fatal: Exiting because of unfinished merge.
    ```
 
    To fix this, run the following commands:

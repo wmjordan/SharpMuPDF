@@ -75,5 +75,7 @@ def main():
 	list = LIBMUPDF_DEF % locals()
 	open("../MuPDFLib/libmupdf.def", "wt").write(list.replace('\r\n', "\n"))
 
+	print("generated libmupdf.def")
+
 if __name__ == "__main__":
 	main()

@@ -212,6 +212,8 @@ EXPORTS
 	fz_malloc_no_throw
 	fz_calloc_no_throw
 	fz_realloc_no_throw
+	fz_malloc_aligned
+	fz_free_aligned
 	fz_strdup
 	fz_memrnd
 	fz_new_string
@@ -241,6 +243,8 @@ EXPORTS
 	fz_aes_setkey_enc
 	fz_aes_setkey_dec
 	fz_aes_crypt_cbc
+	fz_deskew_pixmap
+	fz_skew_detect
 	fz_lookup_blendmode
 	fz_blendmode_name
 	fz_new_function_of_size
@@ -357,7 +361,6 @@ EXPORTS
 	fz_run_page_annots
 	fz_run_page_widgets
 	fz_keep_page
-	fz_keep_page_locked
 	fz_drop_page
 	fz_page_presentation
 	fz_page_label
@@ -449,6 +452,7 @@ EXPORTS
 	ft_name_index
 	fz_hb_lock
 	fz_hb_unlock
+	fz_enumerate_font_cmap
 	fz_ft_lock
 	fz_ft_unlock
 	fz_ft_lock_held
@@ -492,6 +496,9 @@ EXPORTS
 	fz_normalize_vector
 	fz_gridfit_matrix
 	fz_matrix_max_expansion
+	fz_is_valid_quad
+	fz_is_empty_quad
+	fz_is_infinite_quad
 	fz_quad_from_rect
 	fz_rect_from_quad
 	fz_transform_quad
@@ -588,6 +595,7 @@ EXPORTS
 
 	fz_new_output
 	fz_new_output_with_path
+	fz_new_output_with_file_ptr
 	fz_new_output_with_buffer
 	fz_stdout
 	fz_stdods
@@ -624,6 +632,7 @@ EXPORTS
 	fz_write_base64_buffer
 	fz_write_bits
 	fz_write_bits_sync
+	fz_write_stream
 	fz_format_string
 	fz_vsnprintf
 	fz_snprintf
@@ -764,8 +773,10 @@ EXPORTS
 	fz_story_positions
 	fz_file_exists
 	fz_open_file
+	fz_open_file_autodelete
 	fz_try_open_file
 	fz_open_file_w
+	fz_stream_filename
 	fz_open_memory
 	fz_open_buffer
 	fz_open_leecher
@@ -830,6 +841,7 @@ EXPORTS
 	fz_runeptr
 	fz_utflen
 	fz_utf8_from_wchar
+	fz_wchar_from_utf8
 	fz_strtof
 	fz_grisu
 	fz_is_page_range
@@ -852,11 +864,13 @@ EXPORTS
 	fz_print_stext_page_as_json
 	fz_print_stext_page_as_text
 	fz_search_stext_page
+	fz_search_stext_page_cb
 	fz_highlight_selection
 	fz_snap_selection
 	fz_copy_selection
 	fz_copy_rectangle
 	fz_parse_stext_options
+	fz_segment_stext_page
 	fz_new_stext_device
 	fz_new_ocr_device
 	fz_open_reflowed_document
@@ -905,6 +919,10 @@ EXPORTS
 	fz_search_page_number
 	fz_search_chapter_page_number
 	fz_search_display_list
+	fz_search_page_cb
+	fz_search_page_number_cb
+	fz_search_chapter_page_number_cb
+	fz_search_display_list_cb
 	fz_new_display_list_from_svg
 	fz_new_image_from_svg
 	fz_new_display_list_from_svg_xml
@@ -1055,6 +1073,11 @@ EXPORTS
 	fz_dom_remove_attribute
 	fz_dom_attribute
 	fz_dom_get_attribute
+	fz_new_dom
+	fz_new_dom_node
+	fz_new_dom_text_node
+	fz_write_xml
+	fz_save_xml
 
 ; MuPDF exports
 
@@ -1111,6 +1134,7 @@ EXPORTS
 	pdf_annot_has_border_effect
 	pdf_annot_has_icon_name
 	pdf_annot_has_open
+	pdf_annot_has_popup
 	pdf_annot_has_author
 	pdf_annot_flags
 	pdf_annot_rect
@@ -1167,6 +1191,16 @@ EXPORTS
 	pdf_annot_is_standard_stamp
 	pdf_annot_line
 	pdf_set_annot_line
+	pdf_annot_line_leader
+	pdf_annot_line_leader_extension
+	pdf_annot_line_leader_offset
+	pdf_set_annot_line_leader
+	pdf_set_annot_line_leader_extension
+	pdf_set_annot_line_leader_offset
+	pdf_annot_line_caption
+	pdf_set_annot_line_caption
+	pdf_annot_line_caption_offset
+	pdf_set_annot_line_caption_offset
 	pdf_annot_vertex_count
 	pdf_annot_vertex
 	pdf_set_annot_vertices
@@ -1184,8 +1218,17 @@ EXPORTS
 	pdf_annot_has_intent
 	pdf_annot_intent
 	pdf_set_annot_intent
+	pdf_annot_has_callout
+	pdf_annot_callout_style
+	pdf_set_annot_callout_style
+	pdf_annot_callout_line
+	pdf_set_annot_callout_line
+	pdf_annot_callout_point
+	pdf_set_annot_callout_point
+	pdf_parse_default_appearance_unmapped
 	pdf_parse_default_appearance
 	pdf_print_default_appearance
+	pdf_annot_default_appearance_unmapped
 	pdf_annot_default_appearance
 	pdf_set_annot_default_appearance
 	pdf_annot_request_synthesis
@@ -1201,8 +1244,10 @@ EXPORTS
 	pdf_new_display_list_from_annot
 	pdf_new_pixmap_from_annot
 	pdf_new_stext_page_from_annot
+	pdf_is_filespec
 	pdf_is_embedded_file
 	pdf_add_embedded_file
+	pdf_get_filespec_params
 	pdf_get_embedded_file_params
 	pdf_load_embedded_file_contents
 	pdf_verify_embedded_file_checksum
@@ -1281,6 +1326,7 @@ EXPORTS
 	pdf_specifics
 	pdf_document_from_fz_document
 	pdf_page_from_fz_page
+	fz_new_pdf_document_from_fz_document
 	pdf_needs_password
 	pdf_authenticate_password
 	pdf_has_permission
@@ -1336,6 +1382,10 @@ EXPORTS
 	pdf_minimize_document
 	pdf_structure_type
 	pdf_run_document_structure
+	pdf_count_document_associated_files
+	pdf_document_associated_file
+	pdf_count_page_associated_files
+	pdf_page_associated_file
 	pdf_access_exec_menu_item_event
 	pdf_load_encoding
 	pdf_set_font_wmode
@@ -1432,6 +1482,7 @@ EXPORTS
 	pdf_new_indirect
 	pdf_new_array
 	pdf_new_dict
+	pdf_new_point
 	pdf_new_rect
 	pdf_new_matrix
 	pdf_new_date
@@ -1531,6 +1582,8 @@ EXPORTS
 	pdf_dict_put_name
 	pdf_dict_put_string
 	pdf_dict_put_text_string
+	pdf_dict_put_indirect
+	pdf_dict_put_point
 	pdf_dict_put_rect
 	pdf_dict_put_matrix
 	pdf_dict_put_date
@@ -1544,6 +1597,8 @@ EXPORTS
 	pdf_dict_get_name
 	pdf_dict_get_string
 	pdf_dict_get_text_string
+	pdf_dict_get_text_string_opt
+	pdf_dict_get_point
 	pdf_dict_get_rect
 	pdf_dict_get_matrix
 	pdf_dict_get_date
@@ -1597,6 +1652,7 @@ EXPORTS
 	pdf_new_utf8_from_pdf_stream_obj
 	pdf_load_stream_or_string_as_utf8
 	pdf_to_quad
+	pdf_to_point
 	pdf_to_rect
 	pdf_to_matrix
 	pdf_to_date
@@ -1669,6 +1725,13 @@ EXPORTS
 	pdf_page_presentation
 	pdf_load_default_colorspaces
 	pdf_update_default_colorspaces
+	pdf_sync_open_pages
+	pdf_sync_page
+	pdf_sync_links
+	pdf_sync_annots
+	pdf_nuke_page
+	pdf_nuke_links
+	pdf_nuke_annots
 	pdf_lexbuf_init
 	pdf_lexbuf_fin
 	pdf_lexbuf_grow
@@ -1680,11 +1743,14 @@ EXPORTS
 	pdf_parse_ind_obj
 	pdf_parse_journal_obj
 	pdf_append_token
+	pdf_recolor_page
+	pdf_remove_output_intents
 	pdf_store_item
 	pdf_find_item
 	pdf_remove_item
 	pdf_empty_store
 	pdf_purge_locals_from_store
+	pdf_purge_object_from_store
 	pdf_find_font_resource
 	pdf_insert_font_resource
 	pdf_drop_resource_tables
@@ -1790,6 +1856,9 @@ EXPORTS
 	pdf_drop_local_xref
 	pdf_drop_local_xref_and_resources
 	pdf_debug_doc_changes
+	pdf_zugferd_profile
+	pdf_zugferd_xml
+	pdf_zugferd_profile_to_string
 
 ; JBIG2 exports
 

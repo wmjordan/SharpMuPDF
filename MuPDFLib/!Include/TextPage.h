@@ -56,6 +56,11 @@ public:
 	static operator fz_stext_options(TextOptions^ options);
 };
 
+// in mupdf_load_system_font.c
+extern "C" static fz_font* load_windows_font(fz_context* ctx, const char* fontname, int bold, int italic,
+	int needs_exact_metrics);
+extern "C" static void init_system_font_list(void);
+
 public ref class TextFont : IEquatable<TextFont^> {
 public:
 	property String^ Name {
@@ -83,9 +88,19 @@ public:
 	int GetCharacter(int cid) {
 		return ft_char_index(_font->ft_face, cid);
 	}
+	/// <summary>
+	/// Find the glyph id for a given unicode character within a font.
+	/// </summary>
+	/// <param name="unicode">The unicode character to encode.</param>
+	/// <returns>Returns the glyph id for the given unicode value, or 0 if unknown.</returns>
 	int Encode(int unicode) {
 		return fz_encode_character(Context::Ptr, _font, unicode);
 	}
+	/// <summary>
+	/// Return the advance for a given glyph.
+	/// </summary>
+	/// <param name="glyph">The glyph id.</param>
+	/// <param name="vertical">True for vertical writing mode, false for horizontal mode.</param>
 	float Advance(int glyph, bool vertical) {
 		return fz_advance_glyph(Context::Ptr, _font, glyph, vertical);
 	}
@@ -116,8 +131,11 @@ public:
 	property float Size {
 		float get() { return _ch->size; }
 	}
-	property TextFont^ Font {
-		TextFont^ get() { return gcnew TextFont(_ch->font); }
+	/// <summary>
+	/// Gets a pointer to the internal font, for font comparision without creating new TextFont instances.
+	/// </summary>
+	property IntPtr FontPtr {
+		IntPtr get() { return (IntPtr)(void*)_ch->font; }
 	}
 	property TextChar^ Next {
 		TextChar^ get() { return _ch->next ? gcnew TextChar(_ch->next) : nullptr; }
@@ -127,6 +145,9 @@ public:
 	}
 	property MuPDF::Quad Quad {
 		MuPDF::Quad get() { return _ch->quad; }
+	}
+	TextFont^ GetFont() {
+		return gcnew TextFont(_ch->font);
 	}
 	static operator Char(TextChar^ ch) {
 		return ch->_ch->c;

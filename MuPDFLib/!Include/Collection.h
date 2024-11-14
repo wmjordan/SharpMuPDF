@@ -1,7 +1,7 @@
 using namespace System::Collections;
 
-#ifndef __EMPTYCOLLECTION
-#define __EMPTYCOLLECTION
+#ifndef __COLLECTION
+#define __COLLECTION
 
 namespace MuPDF {
 
@@ -104,5 +104,5 @@ private:
 
 };
 
-#endif // !__EMPTYCOLLECTION
+#endif // !__COLLECTION
 

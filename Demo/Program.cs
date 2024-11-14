@@ -52,7 +52,7 @@ namespace Demo
 								using (var tp = p.TextPage) {
 									foreach (var block in tp) {
 										foreach (var line in block) {
-											pageInfo.WriteLine($"{line}({line.FirstCharacter.Font.Name}, {line.FirstCharacter.Size} {line.FirstCharacter.Font.Flags})");
+											pageInfo.WriteLine($"{line}({line.FirstCharacter.GetFont().Name}, {line.FirstCharacter.Size} {line.FirstCharacter.GetFont().Flags})");
 										}
 									}
 								}

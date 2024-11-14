@@ -17,14 +17,9 @@ typedef ref class Colorspace;
 typedef enum class ColorspaceKind;
 typedef ref class Pixmap;
 typedef value struct BBox;
+// in mupdf_load_system_font.c
+extern "C" void install_load_windows_font_funcs(fz_context* ctx);
 #pragma warning (pop)
-
-[UnmanagedFunctionPointerAttribute(CallingConvention::Cdecl)]
-public delegate IntPtr FzLoadSystemFont(IntPtr ctx, [MarshalAsAttribute(UnmanagedType::LPStr)] String^ name, int bold, int italic, int needExactMetrics);
-[UnmanagedFunctionPointerAttribute(CallingConvention::Cdecl)]
-public delegate IntPtr FzLoadSystemCjkFont(IntPtr ctx, [MarshalAsAttribute(UnmanagedType::LPStr)] String^ name, int registry, int serifDesired);
-[UnmanagedFunctionPointerAttribute(CallingConvention::Cdecl)]
-public delegate IntPtr FzLoadSystemFallbackFont(IntPtr ctx, int script, int language, int serif, int bold, int italic);
 
 public ref class Context : IDisposable {
 public:
@@ -48,8 +43,6 @@ public:
 	}
 
 	Document^ OpenDocument(String^ filePath);
-
-	void InstallLoadSystemFontFuncs(FzLoadSystemFont^ loadSystemFont, FzLoadSystemCjkFont^ loadSystemCjkFont, FzLoadSystemFallbackFont^ loadSystemFallbackFont);
 
 	Colorspace^ GetColorspace(ColorspaceKind kind);
 
@@ -81,6 +74,7 @@ private:
 		if (!ctx) {
 			throw gcnew InvalidOperationException("fz_context is null");
 		}
+		install_load_windows_font_funcs(ctx);
 		fz_register_document_handlers(ctx);
 	}
 
