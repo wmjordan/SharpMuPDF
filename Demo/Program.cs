@@ -40,7 +40,7 @@ namespace Demo
 									if (resources != null) {
 										foreach (var item in resources) {
 											if (item.Value.UnderlyingObject is PdfDictionary d) {
-												pageInfo.WriteLine(item.Key.ToString() + " is image");
+												pageInfo.WriteLine(item.Key + " is image");
 											}
 										}
 									}
@@ -52,7 +52,10 @@ namespace Demo
 								using (var tp = p.TextPage) {
 									foreach (var block in tp) {
 										foreach (var line in block) {
-											pageInfo.WriteLine($"{line}({line.FirstCharacter.GetFont().Name}, {line.FirstCharacter.Size} {line.FirstCharacter.GetFont().Flags})");
+											pageInfo.WriteLine($"{line}({line.FirstCharacter.Font.Name}, {line.FirstCharacter.Size} {line.FirstCharacter.Font.Flags})");
+											foreach (var span in line.GetSpans()) {
+												pageInfo.WriteLine(span.ToString());
+											}
 										}
 									}
 								}

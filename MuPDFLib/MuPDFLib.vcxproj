@@ -25,6 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="gen_libmupdf.def.py" />
+    <None Include="modify_libmupdf_vcxproj.py" />
     <None Include="sync_name_table.py" />
     <None Include="version.py" />
   </ItemGroup>
@@ -156,7 +157,9 @@
       <ModuleDefinitionFile>libmupdf.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
-      <Command>Python "$(ProjectDir)gen_libmupdf.def.py"</Command>
+      <Command>Python "$(ProjectDir)gen_libmupdf.def.py"
+Python "$(ProjectDir)modify_libmupdf_vcxproj.py"
+</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -179,6 +182,7 @@
     </Link>
     <PreBuildEvent>
       <Command>Python "$(ProjectDir)gen_libmupdf.def.py"
+Python "$(ProjectDir)modify_libmupdf_vcxproj.py"
 Python "$(ProjectDir)sync_name_table.py"
 Python "$(ProjectDir)version.py"</Command>
     </PreBuildEvent>
@@ -198,7 +202,9 @@ Python "$(ProjectDir)version.py"</Command>
       <ModuleDefinitionFile>libmupdf.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
-      <Command>Python "$(ProjectDir)gen_libmupdf.def.py"</Command>
+      <Command>Python "$(ProjectDir)gen_libmupdf.def.py"
+Python "$(ProjectDir)modify_libmupdf_vcxproj.py"
+</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -221,6 +227,7 @@ Python "$(ProjectDir)version.py"</Command>
     </Link>
     <PreBuildEvent>
       <Command>Python "$(ProjectDir)gen_libmupdf.def.py"
+Python "$(ProjectDir)modify_libmupdf_vcxproj.py"
 Python "$(ProjectDir)sync_name_table.py"
 Python "$(ProjectDir)version.py"</Command>
     </PreBuildEvent>

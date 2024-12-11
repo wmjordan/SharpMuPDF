@@ -32,13 +32,23 @@ That code file is copied from project *SumatraPDF* and all credits goes to them.
 
 ## Shrinking MuPDFLib.dll
 
+The default compilation of MuPDFLib contains a large Unicode font TOFU.
+
+Usually we don't need it. We can exclude it by the following procedure.
+
 Open the property page for the `libmupdf` project.
 
 Add `;TOFU;TOFU_CJK_EXT` to _C/C++_/_Preprocessor_/_Preprocessor Definitions_ for _All Configurations_ and _All Platforms_ in configuration manager.
 
-So you can exclude several huge fonts from the DLL.
-
 For more information, see `config.h` file within the `!include/fitz` folder in `libmupdf` project.
+
+## Compilation helper scripts
+
+There are several Python scripts in the folder of MuPDFLib. You can open and read the comment on top of the scripts to learn their usage.
+
+Those scripts are run before compiling the `MuPDFLib` project automatically.
+
+Especially, the `modify_libmupdf_vcxproj.py` script should be run before compiling the `libmupdf` project, to make modifications about _System font loading_ and _Shrinking MuPDFLib.dll_.
 
 ## .NET assembly reference of MuPDFLib.dll
 

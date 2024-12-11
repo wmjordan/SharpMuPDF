@@ -65,7 +65,7 @@ public ref class TextFont : IEquatable<TextFont^> {
 public:
 	property String^ Name {
 		String^ get() {
-			return _name ? _name : (_name = gcnew String(_font->name));
+			return _name && _font->name == _namePtr ? _name : (_name = gcnew String(_font->name));
 		}
 	}
 	property int GlyphCount {
@@ -79,6 +79,12 @@ public:
 	}
 	property FontFlags Flags {
 		FontFlags get() { return (FontFlags)*(int*)&(_font->flags); }
+	}
+	array<Byte>^ GetFontNameBytes() {
+		GcnewArray(Byte, b, 32);
+		auto n = _font->name;
+		System::Runtime::InteropServices::Marshal::Copy((System::IntPtr)(void*)n, b, 0, 32);
+		return b;
 	}
 	array<short>^ GetWidths() {
 		GcnewArray(short, a, _font->width_count);
@@ -107,11 +113,12 @@ public:
 	Equatable(TextFont, _font)
 
 internal:
-	TextFont(fz_font* font) : _font(font) {};
+	TextFont(fz_font* font) : _font(font), _namePtr(font->name) {};
 
 private:
 	fz_font* _font;
 	String^ _name;
+	char* _namePtr;
 };
 
 public ref class TextChar : Generic::IEnumerable<TextChar^>, IEquatable<TextChar^> {
@@ -123,10 +130,10 @@ public:
 		int get() { return _ch->c; }
 	}
 	/// <summary>
-	/// Gets the sRGB Hex color.
+	/// Gets the sRGB Hex color (alpha in top 8 bits, then r, then g, then b in low bits).
 	/// </summary>
 	property int Color {
-		int get() { return _ch->color; }
+		int get() { return _ch->argb; }
 	}
 	property float Size {
 		float get() { return _ch->size; }
@@ -146,8 +153,25 @@ public:
 	property MuPDF::Quad Quad {
 		MuPDF::Quad get() { return _ch->quad; }
 	}
-	TextFont^ GetFont() {
-		return gcnew TextFont(_ch->font);
+	property TextFont^ Font {
+		TextFont^ get() { return _Font ? _Font : gcnew TextFont(_ch->font); }
+	}
+	/// <summary>
+	/// Compares whether other TextChar has the same font as the current one.
+	/// </summary>
+	/// <param name="other">Another TextChar</param>
+	bool HasSameFont(TextChar^ other) {
+		return other && _ch->font == other->_ch->font;
+	}
+	/// <summary>
+	/// Compares whether other TextChar has the same font, size and color as the current one.
+	/// </summary>
+	/// <param name="other">Another TextChar</param>
+	bool HasSameStyle(TextChar^ other) {
+		return other && _ch->size == other->_ch->size && _ch->argb == other->_ch->argb && _ch->font == other->_ch->font;
+	}
+	String^ ToString() override {
+		return Char::ConvertFromUtf32(_ch->c);
 	}
 	static operator Char(TextChar^ ch) {
 		return ch->_ch->c;
@@ -159,6 +183,7 @@ internal:
 	}
 private:
 	fz_stext_char* _ch;
+	TextFont^ _Font;
 
 #pragma region IEnumerator
 public:
@@ -177,6 +202,22 @@ public:
 
 };
 
+public ref class TextSpan {
+public:
+	initonly int Color;
+	initonly float Size;
+	initonly TextFont^ Font;
+	initonly Point Origin;
+	initonly Box Bound;
+	initonly bool IsVertical;
+	String^ ToString() override;
+internal:
+	TextSpan(fz_stext_char* ch, int length, Box bound, bool vertical) : _ch(ch), _length(length), Font(gcnew TextFont(ch->font)), Size(ch->size), Color(ch->argb), Origin((Point)ch->origin), Bound(bound), IsVertical(vertical) { }
+private:
+	fz_stext_char* _ch;
+	int _length;
+};
+
 public ref class TextLine : Generic::IEnumerable<TextChar^>, IEquatable<MuPDF::TextLine^> {
 public:
 	property bool IsVertical {
@@ -191,14 +232,16 @@ public:
 	property TextChar^ LastCharacter {
 		TextChar^ get() { return gcnew TextChar(_line->last_char); }
 	}
-	String^ ToString() override {
-		StringBuilder^ sb = gcnew StringBuilder();
-		fz_stext_char* c = _line->first_char;
-		do {
-			sb->Append((Char)c->c);
-		} while (c = c->next);
-		return sb->ToString();
+	/// <summary>
+	/// Gets the first font used in TextLine.
+	/// </summary>
+	property TextFont^ Font {
+		TextFont^ get() { return gcnew TextFont(_line->first_char->font); }
 	}
+	Generic::IEnumerable<MuPDF::TextSpan^>^ GetSpans() {
+		return gcnew TextLineSpanContainer(this);
+	}
+	String^ ToString() override;
 internal:
 	TextLine(fz_stext_line* line) : _line(line) {}
 	property fz_stext_line* Ptr {
@@ -206,6 +249,34 @@ internal:
 	}
 private:
 	fz_stext_line* _line;
+	ref class TextLineSpanContainer : Generic::IEnumerable<TextSpan^>, Generic::IEnumerator<MuPDF::TextSpan^> {
+	public:
+		TextLineSpanContainer(TextLine^ line) : _Line(line), _start(_Line->_line->first_char) { }
+		property TextSpan^ Current {
+			virtual TextSpan^ get() sealed { return _Current; }
+		}
+		property Object^ CurrentBase {
+			virtual Object^ get() sealed = System::Collections::IEnumerator::Current::get {
+				return _Current;
+			}
+		}
+		virtual bool MoveNext();
+		virtual void Reset() = System::Collections::IEnumerator::Reset;
+		virtual Generic::IEnumerator<MuPDF::TextSpan^>^ GetEnumerator() sealed = Generic::IEnumerable<MuPDF::TextSpan^>::GetEnumerator {
+			return this;
+		}
+
+		virtual System::Collections::IEnumerator^ GetEnumeratorBase() sealed = System::Collections::IEnumerable::GetEnumerator{
+				return GetEnumerator();
+		}
+		
+	private:
+		~TextLineSpanContainer() {}
+		TextLine^ _Line;
+		TextSpan^ _Current;
+		fz_stext_char* _start;
+		fz_stext_char* _active;
+	};
 
 #pragma region IEnumerator
 public:
@@ -246,7 +317,9 @@ private:
 #pragma region IEnumerator
 public:
 	virtual Generic::IEnumerator<MuPDF::TextLine^>^ GetEnumerator() sealed = Generic::IEnumerable<MuPDF::TextLine^>::GetEnumerator{
-		return _block->type == FZ_STEXT_BLOCK_TEXT ? gcnew Enumerator<TextLine, fz_stext_line>(_block->u.t.first_line, _block->u.t.last_line) : EmptyCollection<MuPDF::TextLine^>::GetEnumerator();
+		return _block->type == FZ_STEXT_BLOCK_TEXT
+			? gcnew Enumerator<TextLine, fz_stext_line>(_block->u.t.first_line, _block->u.t.last_line)
+			: EmptyCollection<MuPDF::TextLine^>::GetEnumerator();
 	}
 
 	virtual System::Collections::IEnumerator^ GetEnumeratorBase() sealed = System::Collections::IEnumerable::GetEnumerator{
@@ -270,6 +343,9 @@ public:
 	}
 	property TextBlock^ LastBlock {
 		TextBlock^ get() { return gcnew TextBlock(_page->last_block); }
+	}
+	String^ ToString() override {
+		return Bound.ToString();
 	}
 internal:
 	TextPage(fz_stext_page* page) : _page(page) {};
