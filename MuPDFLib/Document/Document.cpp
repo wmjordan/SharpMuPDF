@@ -28,6 +28,21 @@ DLLEXP int PdfSaveDocument(fz_context* ctx, pdf_document* doc, const wchar_t* fi
 	return 1;
 }
 
+DLLEXP int PdfSaveSnapshot(fz_context* ctx, pdf_document* doc, const wchar_t* filePath) {
+	char* utf8path = NULL;
+	fz_try(ctx) {
+		utf8path = fz_utf8_from_wchar(ctx, filePath);
+		pdf_save_snapshot(ctx, doc, utf8path);
+	}
+	fz_always(ctx) {
+		fz_free(ctx, utf8path);
+	}
+	fz_catch(ctx) {
+		return 0;
+	}
+	return 1;
+}
+
 #pragma managed
 MuPDF::Document::Document(fz_stream* stream) {
 	OpenStream(stream);
@@ -69,10 +84,24 @@ MuPDF::Page^ MuPDF::Document::LoadPage(int pageNumber) {
 	throw MuException::FromContext();
 }
 
+MuPDF::PdfDictionary^ MuPDF::Document::NewPage(Box mediaBox, int rotate, PdfDictionary^ resources, array<Byte>^ contents) {
+	pin_ptr<Byte> c = &contents[0];
+	auto b = fz_new_buffer_from_copied_data(Context::Ptr, c, contents->Length);
+	return gcnew PdfDictionary(pdf_add_page(Context::Ptr, _pdf, mediaBox, rotate, resources ? resources->Ptr : NULL, b));
+}
+
 void MuPDF::Document::Save(String^ filePath, WriterOptions^ options) {
 	pin_ptr<const wchar_t> p = PtrToStringChars(filePath);
 	pdf_write_options w = options->ToNative();
 	auto r = PdfSaveDocument(Context::Ptr, _pdf, (const wchar_t*)p, (const pdf_write_options*)&w);
+	if (!r) {
+		throw MuException::FromContext();
+	}
+}
+
+void MuPDF::Document::SaveSnapshot(String^ filePath) {
+	pin_ptr<const wchar_t> p = PtrToStringChars(filePath);
+	auto r = PdfSaveSnapshot(Context::Ptr, _pdf, (const wchar_t*)p);
 	if (!r) {
 		throw MuException::FromContext();
 	}

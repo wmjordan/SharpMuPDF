@@ -23,10 +23,12 @@ public:
 	property int PageNumber {
 		int get() { return _pageNumber; }
 	}
+
+	/// <summary>
+	/// Determine the page size in points, taking page rotation into account. The page size is taken to be the crop box if it exists (visible area after cropping), otherwise the media box will be used (possibly including printing marks).
+	/// </summary>
 	property Box Bound {
-		Box get() {
-			return pdf_bound_page(Context::Ptr, _pdfPage, FZ_CROP_BOX);
-		}
+		Box get() { return pdf_bound_page(Context::Ptr, _pdfPage, FZ_CROP_BOX); }
 	}
 	property Box MediaBox {
 		Box get() { return pdf_dict_get_rect(Context::Ptr, _pdfPage->obj, (pdf_obj*)PdfNames::MediaBox); }
@@ -52,6 +54,12 @@ public:
 		float get() {
 			return pdf_dict_get_real_default(Context::Ptr, PagePtr, PDF_NAME(UserUnit), 1);
 		}
+	}
+	property bool HasTransparency {
+		bool get() { return pdf_page_has_transparency(Context::Ptr, _pdfPage); }
+	}
+	property int AssociatedFileCount {
+		int get() { return pdf_count_page_associated_files(Context::Ptr, _pdfPage); }
 	}
 	property PdfDictionary^ PdfObject {
 		PdfDictionary^ get() {
@@ -82,7 +90,9 @@ public:
 	Box BoundPageBox(PageBoxType boxType) {
 		return pdf_bound_page(Context::Ptr, _pdfPage, (fz_box_type)boxType);
 	}
-
+	void SetPageBox(PageBoxType boxType, Box box) {
+		pdf_set_page_box(Context::Ptr, _pdfPage, (fz_box_type)boxType, box);
+	}
 	PdfArray^ GetPageBox(PageBoxType boxType);
 	array<Byte>^ GetContentBytes() {
 		auto c = pdf_page_contents(Context::Ptr, _pdfPage);
@@ -111,6 +121,10 @@ public:
 	}
 	void FlattenInheritablePageItems() {
 		pdf_flatten_inheritable_page_items(Context::Ptr, _pdfPage->obj);
+	}
+	void RefreshPageCache() {
+		pdf_sync_page(Context::Ptr, _pdfPage);
+		RefreshTextPage();
 	}
 	void RefreshTextPage() {
 		if (_textPage) {

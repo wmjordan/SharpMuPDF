@@ -10,23 +10,32 @@ import pathlib
 MAJOR = "2"
 MAJOR_REV = "1"
 MINOR = "25"
+MINOR_REV = "2"
 
 def rewriteRevision(m):
-	return m.group(1) + MAJOR + m.group(2) + MAJOR_REV + m.group(2) + MINOR + m.group(2) + str(int(m.group(3))+1) + m.group(4)
+	return m.group(1) + MAJOR + m.group(2) + MAJOR_REV + m.group(2) + MINOR + m.group(2) + MINOR_REV + m.group(4)
 
 def main():
 	os.chdir(os.path.dirname(__file__))
 
-	asmInfo = open("AssemblyInfo.cpp").read()
-	asmInfo = re.sub(r"(AssemblyFileVersion(?:Attribute?)\(\")\d+\.\d+\.\d+(\.)(\d+)(\"\))", rewriteRevision, asmInfo)
-	open("AssemblyInfo.cpp", "wt").write(asmInfo)
-	print("rewrite AssemblyInfo.cpp")
+	file = "AssemblyInfo.cpp"
+	content = open(file).read()
+	newContent = re.sub(r"(AssemblyFileVersion(?:Attribute?)\(\")\d+\.\d+\.\d+(\.)(\d+)(\"\))", rewriteRevision, content)
+	if newContent != content:
+		open(file, "wt").write(newContent)
+		print("rewrite " + file)
+	else:
+		print("skipped " + file)
 
-	rc = open("MuPDFLib.rc", encoding="utf-16").read()
-	rc = re.sub(r"([A-Z]+VERSION\s+)\d+,\d+,\d+(,)(\d+)(\s*?)", rewriteRevision, rc)
-	rc = re.sub(r"(VALUE\s+\"\w+Version\", \")\d+\.\d+\.\d+(\.)(\d+)(\")", rewriteRevision, rc)
-	open("MuPDFLib.rc", "wt", encoding="utf-16").write(rc)
-	print("rewrite MuPDFLib.rc")
+	file = "MuPDFLib.rc"
+	content = open(file, encoding="utf-16").read()
+	newContent = re.sub(r"([A-Z]+VERSION\s+)\d+,\d+,\d+(,)(\d+)(\s*?)", rewriteRevision, content)
+	if newContent != content:
+		newContent = re.sub(r"(VALUE\s+\"\w+Version\", \")\d+\.\d+\.\d+(\.)(\d+)(\")", rewriteRevision, newContent)
+		open(file, "wt", encoding="utf-16").write(newContent)
+		print("rewrite " + file)
+	else:
+		print("skipped " + file)
 
 if __name__ == "__main__":
 	main()
