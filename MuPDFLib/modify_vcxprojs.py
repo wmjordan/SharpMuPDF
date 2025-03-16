@@ -5,7 +5,7 @@ Rewrite libmupdf.vcxproj:
   1. insert reference to mupdf_load_system_font.c,
   2. add preprocessor TOFU;TOFU_CJK_EXT
 
-Rewrite other vcxproj files to place output files into the proper dir.
+Rewrite other vcxproj files to place output files into the proper directory.
 
 Run this script before compiling libmupdf.vcxproj
 """

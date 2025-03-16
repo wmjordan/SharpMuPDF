@@ -48,7 +48,7 @@ There are several Python scripts in the folder of MuPDFLib. You can open and rea
 
 Those scripts are run before compiling the `MuPDFLib` project automatically.
 
-Especially, the `modify_libmupdf_vcxproj.py` script should be run before compiling the `libmupdf` project, to make modifications about _System font loading_ and _Shrinking MuPDFLib.dll_.
+Especially, the `modify_vcxprojs.py` script should be run before compiling the `libmupdf` project, to make modifications about _System font loading_ and _Shrinking MuPDFLib.dll_.
 
 ## .NET assembly reference of MuPDFLib.dll
 
