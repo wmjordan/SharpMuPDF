@@ -58,6 +58,10 @@ If you redistribute the MuPDFLib.dll which is referenced as a .NET assembly in y
 
 To fix the problem, enclose the Visual C++ Runtime library files with your redistribution. At least, `vcruntime140.dll` and `msvcp140.dll` are the minimum set of required DLL files.
 
+## License
+
+This project follows the license terms of *MuPDF*.
+
 ## Update source code
 
 1. Use `git pull` command to update the repository.
@@ -111,6 +115,12 @@ To fix the problem, enclose the Visual C++ Runtime library files with your redis
 
    Afterwards, we can `pull` from master then.
 
+   Sometimes, new submodules could be added to the origin repository. Use the following command to update them into your repository.
+
+   ``` bash
+   git submodule update --init --recursive
+   ```
+
 3. The first a few lines in the `name-table.h` file have slight modifications from the original one in the `libmupdf` project, for the sake of making field names valid in .NET. Check whether it is changed and make the corresponding synchronization. To facilitate this operation, run the `sync_name_table.py` script within the `MuPDFLib` project folder.
 
 ## Git Proxy
@@ -127,7 +137,3 @@ When you are done, use the following command to reset the proxy to default:
 git config --global --unset http.proxy
 git config --global --unset https.proxy
 ```
-
-## License
-
-This project follows the license terms of *MuPDF*.
