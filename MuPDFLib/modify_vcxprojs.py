@@ -22,12 +22,12 @@ def main():
 	modified_files = []
 	default_namespace = "http://schemas.microsoft.com/developer/msbuild/2003"
 
-	for filename in ["bin2coff.vcxproj", "libextract.vcxproj", "libharfbuzz.vcxproj", "libleptonica.vcxproj", "libluratech.vcxproj", "libmupdf.vcxproj", "libpkcs7.vcxproj", "libresources.vcxproj", "libtesseract.vcxproj", "libthirdparty.vcxproj"]:
+	for filename in ["bin2coff.vcxproj", "libextract.vcxproj", "libharfbuzz.vcxproj", "libleptonica.vcxproj", "libluratech.vcxproj", "libmupdf.vcxproj", "libpkcs7.vcxproj", "libresources.vcxproj", "libtesseract.vcxproj", "libthirdparty.vcxproj", "libmubarcode.vcxproj", "libzxing.vcxproj", "sodochandler.vcxproj"]:
 		print(f'Processing {filename}...')
-		tree = ET.parse(filename)
+		doc = ET.parse(filename)
 		ET.register_namespace("", default_namespace)
 		ns = {'ms': default_namespace}
-		root = tree.getroot()
+		root = doc.getroot()
 		any_modification = False
 			
 		for pg in root.findall("ms:PropertyGroup", ns):
@@ -47,7 +47,7 @@ def main():
 			shutil.copy(filename, backup_filename)
 			print(f'Backup created for {filename}.')
 			# save modified file
-			tree.write(filename, encoding='utf-8', xml_declaration=True)
+			doc.write(filename, encoding='utf-8', xml_declaration=True)
 			print(f'Processed {filename}.')
 			modified_files.append(filename)
 		else:
@@ -55,9 +55,42 @@ def main():
 
 	print(f'Files modified: {modified_files}')
 
+def modify_preprocessor(preprocessors, preprocessor, value = None):
+	pe = preprocessor + "=";
+	for p in preprocessors:
+		if preprocessor == p or p.startswith(pe): # skip if preprocessor already defined
+			return False
+	preprocessors.insert(0, preprocessor + "=" + value if value is not None else preprocessor)
+	return True
+
 def modify_libmupdf(root, ns):
 	# find all ItemGroup/ClCompile
 	modified = False
+
+	# modify ItemDefinitionGroup/ClCompile/PreprocessorDefinitions elements
+	preprocessor_elements = root.findall("ms:ItemDefinitionGroup/ms:ClCompile/ms:PreprocessorDefinitions", ns)
+
+	if preprocessor_elements is not None:
+		for elem in preprocessor_elements:
+			preprocessors = elem.text.split(';')
+			# check if contains "TOFU;TOFU_CJK_EXT;"
+			modified |= modify_preprocessor(preprocessors, "TOFU")
+			modified |= modify_preprocessor(preprocessors, "TOFU_CJK_EXT")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_CBZ", "0")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_EPUB", "0")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_FB2", "0")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_HTML", "0")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_JS", "0")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_MOBI", "0")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_OFFICE", "0")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_OCR_OUTPUT", "0")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_ODT_OUTPUT", "0")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_DOCX_OUTPUT", "0")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_TXT", "0")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_XPS", "0")
+			if modified:
+				elem.text = ';'.join(preprocessors)
+
 	cl_compile_elements = root.findall("ms:ItemGroup/ms:ClCompile", ns)
 
 	# check if included Include='..\..\..\MuPDFLib\Document\mupdf_load_system_font.c'
@@ -68,16 +101,6 @@ def modify_libmupdf(root, ns):
 		if first_item_group is not None:
 			new_cl_compile = ET.SubElement(first_item_group, "ClCompile")
 			new_cl_compile.set('Include', target_include)
-			modified = True
-
-	# modify ItemDefinitionGroup/ClCompile/PreprocessorDefinitions elements
-	preprocessor_elements = root.findall("ms:ItemDefinitionGroup/ms:ClCompile/ms:PreprocessorDefinitions", ns)
-
-	for elem in preprocessor_elements:
-		# check if contains "TOFU;TOFU_CJK_EXT;"
-		if "TOFU;TOFU_CJK_EXT;" not in elem.text:
-			# prepend "TOFU;TOFU_CJK_EXT;"
-			elem.text = "TOFU;TOFU_CJK_EXT;" + elem.text
 			modified = True
 	return modified
 
