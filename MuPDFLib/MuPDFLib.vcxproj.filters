@@ -19,6 +19,7 @@
     <None Include="gen_libmupdf.def.py" />
     <None Include="sync_name_table.py" />
     <None Include="version.py" />
+    <None Include="modify_vcxprojs.py" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Context.cpp" />
