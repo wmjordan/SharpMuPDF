@@ -39,6 +39,11 @@ public:
 	property int Alpha {
 		int get() { return fz_pixmap_alpha(Context::Ptr, _pixmap); }
 	}
+
+	static Pixmap^ Create(ColorspaceKind colorspace, int width, int height);
+
+	static Pixmap^ Create(ColorspaceKind colorspace, MuPDF::BBox box);
+
 	void SetBackgroundWhite() {
 		Clear(0xFF);
 	}

@@ -58,6 +58,8 @@ If you redistribute the MuPDFLib.dll which is referenced as a .NET assembly in y
 
 To fix the problem, enclose the Visual C++ Runtime library files with your redistribution. At least, `vcruntime140.dll` and `msvcp140.dll` are the minimum set of required DLL files.
 
+If you don't reference MuPDFLib.dll as a .NET assembly, those Visual C++ Runtime library files are not necessary.
+
 ## License
 
 This project follows the license terms of *MuPDF*.

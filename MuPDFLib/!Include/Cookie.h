@@ -20,7 +20,7 @@ public:
 		int get() { return _cookie->progress; }
 	}
 	property int ProgressMax {
-		int get() { return _cookie->progress_max; }
+		int get() { return (int)(_cookie->progress_max); }
 	}
 	property int Errors {
 		int get() { return _cookie->errors; }

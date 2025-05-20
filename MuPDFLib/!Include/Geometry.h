@@ -11,6 +11,9 @@ using namespace System;
 
 namespace MuPDF {
 
+/// <summary>
+/// A point with float coordinates.
+/// </summary>
 public value struct Point : IEquatable<Point> {
 public:
 	initonly float X, Y;
@@ -45,6 +48,9 @@ public:
 value struct BBox;
 value struct Matrix;
 
+/// <summary>
+/// A rectangle with float coordinates.
+/// </summary>
 public value struct Box {
 public:
 	initonly float X0, Y0, X1, Y1;
@@ -112,6 +118,9 @@ public:
 	}
 };
 
+/// <summary>
+/// A rectangle with integer coordinates.
+/// </summary>
 public value struct BBox {
 public:
 	initonly int X0, Y0, X1, Y1;

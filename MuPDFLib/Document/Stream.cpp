@@ -44,12 +44,12 @@ array<Byte>^ MuPDF::Stream::ReadAll(int maxSize) {
 
 	MemoryStream^ ms = gcnew MemoryStream(4096);
 	BinaryWriter^ bw = gcnew BinaryWriter(ms);
-	int l;
+	size_t l;
 	try {
 		GcnewArray(Byte, b, 4096);
 		pin_ptr<Byte> p = &b[0];
 		while ((l = fz_read(Context::Ptr, _stream, p, 4096)) > 0) {
-			bw->Write(b, 0, l);
+			bw->Write(b, 0, (int)(l));
 			if (ms->Length >= 0x06400000 && ms->Length > maxSize) {
 				throw gcnew IOException("Compression bomb detected.");
 			}

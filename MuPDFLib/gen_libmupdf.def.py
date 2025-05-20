@@ -15,9 +15,9 @@ def generateExports(header, exclude, pattern = '/*.h'):
 		return "\r\n".join([generateExports(os.path.join(file), exclude) for file in pathlib.Path().glob(header + pattern)])
 
 	data = open(header, "r").read()
-	data = re.sub(r"(?sm)^#ifndef NDEBUG\s.*?^#endif", "", data, 0)
-	data = re.sub(r"(?sm)^#ifdef ARCH_ARM\s.*?^#endif", "", data, 0)
-	data = re.sub(r"(?sm)^#ifdef FITZ_DEBUG_LOCKING\s.*?^#endif", "", data, 0)
+	data = re.sub(r"(?sm)^#ifndef NDEBUG\s.*?^#endif", "", data, count= 0)
+	data = re.sub(r"(?sm)^#ifdef ARCH_ARM\s.*?^#endif", "", data, count= 0)
+	data = re.sub(r"(?sm)^#ifdef FITZ_DEBUG_LOCKING\s.*?^#endif", "", data, count= 0)
 	data = data.replace(" FZ_NORETURN;", ";")
 	functions = re.findall(r"(?sm)^\w+ (?:\w+ )?\*?(\w+)\(.*?\);", data)
 	return "\r\n".join(["\t" + name for name in functions if name not in exclude])

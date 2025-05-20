@@ -108,7 +108,7 @@ public:
 	property PdfObject^ UnderlyingObject {
 		PdfObject^ get() {
 			return pdf_is_indirect(_ctx, _obj)
-				? Wrap(pdf_resolve_indirect_chain(_ctx, _obj))
+				? Wrap(_obj, true)
 				: this;
 		}
 	}
@@ -128,7 +128,10 @@ public:
 		return (p = dynamic_cast<PdfObject^>(obj)) && _obj == p->_obj;
 	}
 	virtual int GetHashCode() override {
+#pragma warning(push)
+#pragma warning(disable:4302 4311)
 		return (int)_obj;
+#pragma warning(pop)
 	}
 	virtual String^ ToString() override {
 		return TypeKind.ToString();
@@ -147,7 +150,10 @@ internal:
 	}
 	property fz_context* Ctx { fz_context* get() { return _ctx; } }
 	property pdf_obj* Ptr { pdf_obj* get() { return _obj; } }
-	static PdfObject^ Wrap(pdf_obj* obj);
+	static PdfObject^ Wrap(pdf_obj* obj, bool resolve);
+	static PdfObject^ Wrap(pdf_obj* obj) {
+		return Wrap(obj, false);
+	}
 private:
 	pdf_obj* _obj;
 	fz_context* _ctx;
@@ -252,7 +258,7 @@ public:
 		String^ get();
 	}
 	property int Length {
-		int get() { return pdf_to_str_len(Context::Ptr, Ptr); }
+		int get() { return (int)(pdf_to_str_len(Context::Ptr, Ptr)); }
 	}
 	/// <summary>
 	/// Gets underlying bytes in a PDF string.
@@ -393,8 +399,27 @@ public:
 	/// <param name="data">The data to be placed into the stream.</param>
 	/// <param name="compress">Whether the data is compressed. If not compressed, /Filter and /DecodeParms will be removed.</param>
 	void SetBytes(array<Byte>^ data, bool compress);
+	~PdfStream() {
+		ReleaseHandle();
+	}
+	!PdfStream() {
+		ReleaseHandle();
+	}
 internal:
-	PdfStream(pdf_obj* obj) : PdfDictionary(obj) {};
+	PdfStream(pdf_obj* obj) : PdfDictionary(pdf_resolve_indirect_chain(Context::Ptr, obj)), _obj(obj) {
+		pdf_keep_obj(_ctx = Context::Ptr, obj);
+	};
+private:
+	fz_context* _ctx;
+	pdf_obj* _obj;
+
+	void ReleaseHandle() {
+		if (_obj && _ctx) {
+			pdf_drop_obj(_ctx, _obj);
+			_obj = NULL;
+			_ctx = NULL;
+		}
+	}
 };
 
 public ref class PdfDocumentInfo : PdfDictionary {
@@ -521,10 +546,10 @@ public:
 		virtual Kind get() override { return Kind::Reference; }
 	}
 	PdfObject^ Resolve() {
-		return Wrap(pdf_resolve_indirect_chain(Context::Ptr, Ptr));
+		return Wrap(Ptr, true);
 	}
 	virtual String^ ToString() override {
-		return Number.ToString() + " " + Generation.ToString() + " R";
+		return String::Concat(Number.ToString(), " ", Generation.ToString(), " R");
 	}
 internal:
 	PdfReference(pdf_obj* obj) : PdfObject(obj) {};

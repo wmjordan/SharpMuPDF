@@ -6,15 +6,6 @@
 using namespace System::Threading;
 
 #pragma unmanaged
-static fz_pixmap* GetPixmap(fz_context* ctx, fz_colorspace* cs, int width, int height) {
-	fz_pixmap* p;
-	MuTryReturn(ctx, fz_new_pixmap(ctx, cs, width, height, NULL, 0), p);
-}
-static fz_pixmap* GetPixmap(fz_context* ctx, fz_colorspace* cs, fz_irect rect) {
-	fz_pixmap* p;
-	MuTryReturn(ctx, fz_new_pixmap_with_bbox(ctx, cs, rect, NULL, 0), p);
-}
-
 DLLEXP fz_stream* OpenFile(fz_context* ctx, const wchar_t* filePath) {
 	fz_stream* r;
 	MuTryReturn(ctx, fz_open_file_w(ctx, filePath), r);
@@ -82,37 +73,8 @@ MuPDF::Context^ MuPDF::Context::Instance::get() {
 	return _Instance = gcnew Context(fz_clone_context(s_state.m_ctx), true);
 }
 
-MuPDF::Document^ MuPDF::Context::OpenDocument(String^ filePath) {
-	Stream^ s = gcnew Stream(filePath);
-	try {
-		auto doc = gcnew Document(s->Ptr);
-		doc->FilePath = filePath;
-		return doc;
-	}
-	catch (Exception^) {
-		delete s;
-		throw;
-	}
-}
-
 MuPDF::Colorspace^ MuPDF::Context::GetColorspace(ColorspaceKind kind) {
 	return gcnew Colorspace(GetFzColorspace(kind));
-}
-
-MuPDF::Pixmap^ MuPDF::Context::CreatePixmap(ColorspaceKind colorspace, int width, int height) {
-	fz_pixmap* pixmap = GetPixmap(_context, GetFzColorspace(colorspace), width, height);
-	if (pixmap) {
-		return gcnew Pixmap(pixmap);
-	}
-	throw MuException::FromContext();
-}
-
-MuPDF::Pixmap^ MuPDF::Context::CreatePixmap(ColorspaceKind colorspace, BBox box) {
-	fz_pixmap* pixmap = GetPixmap(_context, GetFzColorspace(colorspace), box);
-	if (pixmap) {
-		return gcnew Pixmap(pixmap);
-	}
-	throw MuException::FromContext();
 }
 
 MuPDF::Context^ MuPDF::Context::MakeMainContext() {
@@ -137,11 +99,11 @@ void MuPDF::Context::ReleaseHandle() {
 
 fz_colorspace* MuPDF::Context::GetFzColorspace(ColorspaceKind kind) {
 	switch (kind) {
-	case ColorspaceKind::Rgb: return fz_device_rgb(_context);
-	case ColorspaceKind::Cmyk: return fz_device_cmyk(_context);
-	case ColorspaceKind::Gray: return fz_device_gray(_context);
-	case ColorspaceKind::Bgr: return fz_device_bgr(_context);
-	case ColorspaceKind::Lab: return fz_device_lab(_context);
+		case ColorspaceKind::Rgb: return fz_device_rgb(Ptr);
+		case ColorspaceKind::Cmyk: return fz_device_cmyk(Ptr);
+		case ColorspaceKind::Gray: return fz_device_gray(Ptr);
+		case ColorspaceKind::Bgr: return fz_device_bgr(Ptr);
+		case ColorspaceKind::Lab: return fz_device_lab(Ptr);
 	}
 	throw gcnew MuException("Invalid colorspace kind.");
 }

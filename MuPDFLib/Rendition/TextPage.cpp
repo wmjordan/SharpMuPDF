@@ -29,7 +29,7 @@ String^ MuPDF::TextLine::ToString() {
 }
 
 String^ MuPDF::TextBlock::ToString() {
-	if (IsImageBlock) {
+	if (Type != BlockType::Text) {
 		return String::Empty;
 	}
 	StringBuilder^ sb = gcnew StringBuilder(16);

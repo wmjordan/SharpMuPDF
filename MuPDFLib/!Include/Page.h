@@ -103,6 +103,43 @@ public:
 		return nullptr;
 	}
 
+	/// <summary>
+	/// Clip contents, links and annotations within this page.
+	/// </summary>
+	/// <param name="box">The preserved region within this page.</param>
+	void Clip(Box box) {
+		auto r = (fz_rect)box;
+		pdf_clip_page(Context::Ptr, _pdfPage, &r);
+	}
+
+	void SyncPage() {
+		pdf_sync_page(Context::Ptr, _pdfPage);
+	}
+	/// <summary>
+	/// Remove cached links and annotations within this page.
+	/// </summary>
+	void NukePage() {
+		pdf_nuke_page(Context::Ptr, _pdfPage);
+	}
+	void SyncLinks() {
+		pdf_sync_links(Context::Ptr, _pdfPage);
+	}
+	/// <summary>
+	/// Remove cached links within this page.
+	/// </summary>
+	void NukeLinks() {
+		pdf_nuke_links(Context::Ptr, _pdfPage);
+	}
+	void SyncAnnotations() {
+		pdf_sync_annots(Context::Ptr, _pdfPage);
+	}
+	/// <summary>
+	/// Remove cached annotations within this page.
+	/// </summary>
+	void NukeAnnotations() {
+		pdf_nuke_annots(Context::Ptr, _pdfPage);
+	}
+
 	void Run(Device^ dev, Matrix ctm, Cookie^ cookie);
 	void Run(Device^ dev, Cookie^ cookie) {
 		Run(dev, Matrix::Identity, cookie);
@@ -121,6 +158,9 @@ public:
 	}
 	void FlattenInheritablePageItems() {
 		pdf_flatten_inheritable_page_items(Context::Ptr, _pdfPage->obj);
+	}
+	MuPDF::PdfObject^ GetAssociatedFile(int index) {
+		return MuPDF::PdfObject::Wrap(pdf_page_associated_file(Context::Ptr, _pdfPage, index));
 	}
 	void RefreshPageCache() {
 		pdf_sync_page(Context::Ptr, _pdfPage);

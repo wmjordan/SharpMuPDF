@@ -26,34 +26,34 @@ public:
 	~Context() {
 		ReleaseHandle();
 	}
-	static property Context^ Instance {
-		Context^ get();
-	}
 
 	/// <summary>
-	/// Gets or sets render anti-alias level. Valid values are ranged [0, 8].
+	/// Gets or sets rendition anti-alias level. Valid values are ranged [0, 8].
 	/// </summary>
-	property int AntiAlias {
-		int get() { return fz_aa_level(_context); }
-		void set(int value) { fz_set_aa_level(_context, value); }
+	static property int AntiAlias {
+		int get() { return fz_aa_level(Ptr); }
+		void set(int value) { fz_set_aa_level(Ptr, value); }
 	}
-	property int TextAntiAlias {
-		int get() { return fz_text_aa_level(_context); }
-		void set(int value) { fz_set_text_aa_level(_context, value); }
+	/// <summary>
+	/// Gets or sets text rendition anti-alias level. Valid values are ranged [0, 8].
+	/// </summary>
+	static property int TextAntiAlias {
+		int get() { return fz_text_aa_level(Ptr); }
+		void set(int value) { fz_set_text_aa_level(Ptr, value); }
 	}
 
-	Document^ OpenDocument(String^ filePath);
-
-	Colorspace^ GetColorspace(ColorspaceKind kind);
-
-	Pixmap^ CreatePixmap(ColorspaceKind colorspace, int width, int height);
-
-	Pixmap^ CreatePixmap(ColorspaceKind colorspace, BBox box);
+	static Colorspace^ GetColorspace(ColorspaceKind kind);
 
 internal:
+	static property Context^ Instance {
+		Context ^ get();
+	}
+
 	static property fz_context* Ptr {
 		fz_context* get() { return Instance->_context; }
 	}
+
+	static fz_colorspace* GetFzColorspace(ColorspaceKind kind);
 
 protected:
 	!Context() {
@@ -79,8 +79,6 @@ private:
 	}
 
 	void ReleaseHandle();
-
-	fz_colorspace* GetFzColorspace(ColorspaceKind kind);
 };
 
 };

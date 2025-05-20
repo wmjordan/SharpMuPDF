@@ -9,8 +9,8 @@ import pathlib
 
 MAJOR = "2"
 MAJOR_REV = "1"
-MINOR = "25"
-MINOR_REV = "2"
+MINOR = "26"
+MINOR_REV = "0"
 
 def rewriteRevision(m):
 	return m.group(1) + MAJOR + m.group(2) + MAJOR_REV + m.group(2) + MINOR + m.group(2) + MINOR_REV + m.group(4)

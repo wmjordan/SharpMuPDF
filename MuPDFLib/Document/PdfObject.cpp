@@ -43,7 +43,7 @@ Kind PdfObject::TypeKind::get() {
 	return Kind::Unknown;
 };
 
-PdfObject^ PdfObject::Wrap(pdf_obj* obj) {
+PdfObject^ PdfObject::Wrap(pdf_obj* obj, bool resolve) {
 	if (obj == PDF_NULL) {
 		return (PdfObject^)PdfNull::Instance;
 	}
@@ -62,10 +62,13 @@ PdfObject^ PdfObject::Wrap(pdf_obj* obj) {
 	case PDF_STRING: return gcnew PdfString(obj);
 	case PDF_NAME: return gcnew PdfName(obj);
 	case PDF_ARRAY: return gcnew PdfArray(obj);
-	case PDF_DICT: return pdf_is_stream(Context::Ptr, obj) ? gcnew PdfStream(obj) : gcnew PdfDictionary(obj);
-	case PDF_INDIRECT: return gcnew PdfReference(obj);
+	case PDF_DICT: return gcnew PdfDictionary(obj);
+	case PDF_INDIRECT:
+		return resolve
+			? pdf_is_stream(Context::Ptr, obj) ? gcnew PdfStream(obj) : Wrap(pdf_resolve_indirect(Context::Ptr, obj))
+			: gcnew PdfReference(obj);
 	}
-	throw gcnew MuException("Invalid object kind: " + obj->kind.ToString());
+	throw gcnew MuException("Unexpected object kind: " + obj->kind.ToString());
 }
 
 bool PdfObject::Equals(PdfObject^ other) {
@@ -111,7 +114,7 @@ PdfObject^ PdfDictionary::Locate(...array<PdfNames>^ names) {
 			goto RETURN_NULL;
 		}
 	}
-	return Wrap(pdf_resolve_indirect_chain(ctx, pdf_dict_get(ctx, obj, (pdf_obj*)names[i])));
+	return Wrap(pdf_dict_get(ctx, obj, (pdf_obj*)names[i]), true);
 RETURN_NULL:
 	return (PdfObject^)PdfNull::Instance;
 }
@@ -119,7 +122,10 @@ RETURN_NULL:
 array<Byte>^ PdfString::GetBytes() {
 	size_t l;
 	auto b = pdf_to_string(Ctx, Ptr, &l);
-	array<Byte>^ r = gcnew array<Byte>(l);
+	if (l > INT_MAX) {
+		throw gcnew System::InsufficientMemoryException("String length larger than INT_MAX");
+	}
+	array<Byte>^ r = gcnew array<Byte>((int)(l));
 	memcpy(&r, b, l);
 	return r;
 }
@@ -127,18 +133,21 @@ array<Byte>^ PdfString::GetBytes() {
 String^ PdfString::DecodePdfString() {
 	size_t l;
 	auto b = pdf_to_string(Ctx, Ptr, &l);
+	if (l > INT_MAX) {
+		throw gcnew System::InsufficientMemoryException("String length larger than INT_MAX");
+	}
 	if (b[0] == (char)254 && b[1] == (char)255) {
-		return gcnew String(b, 2, l - 2, Encoding::BigEndianUnicode);
+		return gcnew String(b, 2, (int)(l - 2), Encoding::BigEndianUnicode);
 	}
 	if (b[0] == (char)255 && b[1] == (char)254) {
-		return gcnew String(b, 2, l - 2, Encoding::Unicode);
+		return gcnew String(b, 2, (int)(l - 2), Encoding::Unicode);
 	}
 	// PDFENCODE
 	auto chars = new Char[l];
 	for (size_t i = 0; i < l; i++) {
 		chars[i] = fz_unicode_from_pdf_doc_encoding[b[i]];
 	}
-	return gcnew String(chars, 0, l);
+	return gcnew String(chars, 0, (int)(l));
 }
 String^ PdfString::Value::get() {
 	return _string ? _string : (_string = DecodePdfString());

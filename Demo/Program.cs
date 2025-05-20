@@ -18,7 +18,7 @@ namespace Demo
 			using (var cookie = new Cookie())
 			using (var pageInfo = new StreamWriter("pages.txt", false)) { // Creates the context
 				try {
-					using (var doc = Context.Instance.OpenDocument("test.pdf")) {
+					using (var doc = Document.Open("test.pdf")) {
 						Console.WriteLine("Page count: " + doc.PageCount);
 						Console.WriteLine("Object count: " + doc.ObjectCount);
 
@@ -54,6 +54,7 @@ namespace Demo
 										foreach (var line in block) {
 											pageInfo.WriteLine($"{line}({line.FirstCharacter.Font.Name}, {line.FirstCharacter.Size} {line.FirstCharacter.Font.Flags})");
 											foreach (var span in line.GetSpans()) {
+												pageInfo.Write('\t');
 												pageInfo.WriteLine(span.ToString());
 											}
 										}
@@ -122,10 +123,10 @@ namespace Demo
 			// creates a pixmap the same size as the width and height of the page
 			using (Pixmap
 #if UNSAFE
-			pix = Context.Instance.CreatePixmap(ColorspaceKind.Rgb, width, height)
+			pix = Pixmap.Create(ColorspaceKind.Rgb, width, height)
 #else
 			// use BGR color space to save byte conversions
-			pix = Context.Instance.CreatePixmap(ColorspaceKind.Bgr, width, height)
+			pix = Pixmap.Create(ColorspaceKind.Bgr, width, height)
 #endif
 			) {
 				// sets white color as the background color of the pixmap

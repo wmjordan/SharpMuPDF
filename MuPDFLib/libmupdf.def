@@ -48,11 +48,19 @@ EXPORTS
 	fz_close_band_writer
 	fz_drop_band_writer
 	fz_new_band_writer_of_size
+	fz_string_from_barcode_type
+	fz_barcode_type_from_string
+	fz_new_barcode_image
+	fz_new_barcode_pixmap
+	fz_decode_barcode_from_page
+	fz_decode_barcode_from_pixmap
+	fz_decode_barcode_from_display_list
 	fz_bidi_fragment_text
 	fz_keep_bitmap
 	fz_drop_bitmap
 	fz_invert_bitmap
 	fz_new_bitmap_from_pixmap
+	fz_new_bitmap_from_image
 	fz_new_bitmap_from_pixmap_band
 	fz_new_bitmap
 	fz_bitmap_details
@@ -114,11 +122,13 @@ EXPORTS
 	fz_colorspace_is_cmyk
 	fz_colorspace_is_lab
 	fz_colorspace_is_indexed
+	fz_colorspace_is_icc
 	fz_colorspace_is_device_n
 	fz_colorspace_is_device
 	fz_colorspace_is_device_gray
 	fz_colorspace_is_device_cmyk
 	fz_colorspace_is_lab_icc
+	fz_colorspace_digest
 	fz_is_valid_blend_colorspace
 	fz_base_colorspace
 	fz_device_gray
@@ -146,6 +156,10 @@ EXPORTS
 	fz_deflate
 	fz_new_deflated_data
 	fz_new_deflated_data_from_buffer
+	fz_brotli_bound
+	fz_compress_brotli
+	fz_new_brotli_data
+	fz_new_brotli_data_from_buffer
 	fz_compress_ccitt_fax_g3
 	fz_compress_ccitt_fax_g4
 	fz_keep_compressed_buffer
@@ -201,6 +215,7 @@ EXPORTS
 	fz_set_graphics_min_line_width
 	fz_user_css
 	fz_set_user_css
+	fz_load_user_css
 	fz_use_document_css
 	fz_set_use_document_css
 	fz_enable_icc
@@ -223,6 +238,7 @@ EXPORTS
 	fz_push_try
 	fz_do_try
 	fz_do_always
+	fz_register_activity_logger
 	fz_new_context_imp
 	fz_md5_init
 	fz_md5_update
@@ -244,7 +260,7 @@ EXPORTS
 	fz_aes_setkey_dec
 	fz_aes_crypt_cbc
 	fz_deskew_pixmap
-	fz_skew_detect
+	fz_detect_skew
 	fz_lookup_blendmode
 	fz_blendmode_name
 	fz_new_function_of_size
@@ -388,6 +404,7 @@ EXPORTS
 	fz_open_faxd
 	fz_open_flated
 	fz_open_libarchived
+	fz_open_brotlid
 	fz_open_lzwd
 	fz_open_predict
 	fz_open_jbig2d
@@ -422,6 +439,8 @@ EXPORTS
 	fz_load_system_font
 	fz_load_system_cjk_font
 	fz_lookup_cjk_ordering_by_language
+	fz_lookup_noto_stem_from_script
+	fz_lookup_script_name
 	fz_load_fallback_font
 	fz_new_type3_font
 	fz_new_font_from_memory
@@ -453,6 +472,7 @@ EXPORTS
 	fz_hb_lock
 	fz_hb_unlock
 	fz_enumerate_font_cmap
+	fz_calculate_font_ascender_descender
 	fz_ft_lock
 	fz_ft_unlock
 	fz_ft_lock_held
@@ -462,6 +482,7 @@ EXPORTS
 	fz_atof
 	fz_atoi
 	fz_atoi64
+	fz_atoz
 	fz_concat
 	fz_scale
 	fz_pre_scale
@@ -505,6 +526,8 @@ EXPORTS
 	fz_is_point_inside_quad
 	fz_is_point_inside_rect
 	fz_is_point_inside_irect
+	fz_is_rect_inside_rect
+	fz_is_irect_inside_irect
 	fz_is_quad_inside_quad
 	fz_is_quad_intersecting_quad
 	fz_getopt_long
@@ -567,6 +590,29 @@ EXPORTS
 	fz_load_jbig2_subimage
 	fz_load_bmp_subimage_count
 	fz_load_bmp_subimage
+	fz_parse_json
+	fz_append_json
+	fz_write_json
+	fz_json_new_null
+	fz_json_new_boolean
+	fz_json_new_number
+	fz_json_new_string
+	fz_json_new_array
+	fz_json_new_object
+	fz_json_array_push
+	fz_json_object_set
+	fz_json_is_null
+	fz_json_is_boolean
+	fz_json_is_number
+	fz_json_is_string
+	fz_json_is_array
+	fz_json_is_object
+	fz_json_to_boolean
+	fz_json_to_number
+	fz_json_to_string
+	fz_json_array_length
+	fz_json_array_get
+	fz_json_object_get
 	fz_make_link_dest_none
 	fz_make_link_dest_xyz
 	fz_new_link_of_size
@@ -643,6 +689,8 @@ EXPORTS
 	fz_new_rle_output
 	fz_new_arc4_output
 	fz_new_deflate_output
+	fz_is_valid_xml_char
+	fz_is_valid_xml_string
 	fz_walk_path
 	fz_new_path
 	fz_keep_path
@@ -666,10 +714,17 @@ EXPORTS
 	fz_new_stroke_state
 	fz_new_stroke_state_with_dash_len
 	fz_keep_stroke_state
+	fz_stroke_state_eq
 	fz_drop_stroke_state
 	fz_unshare_stroke_state
 	fz_unshare_stroke_state_with_dash_len
 	fz_clone_stroke_state
+	fz_linecap_from_string
+	fz_string_from_linecap
+	fz_linejoin_from_string
+	fz_string_from_linejoin
+	fz_path_is_rect
+	fz_path_is_rect_with_bounds
 	fz_pixmap_bbox
 	fz_pixmap_width
 	fz_pixmap_height
@@ -819,9 +874,12 @@ EXPORTS
 	fz_strsep
 	fz_strlcpy
 	fz_strlcat
+	fz_strstr
+	fz_strstrcase
 	fz_memmem
 	fz_dirname
 	fz_basename
+	fz_strverscmp
 	fz_urldecode
 	fz_decode_uri
 	fz_decode_uri_component
@@ -835,6 +893,7 @@ EXPORTS
 	fz_strcasecmp
 	fz_strncasecmp
 	fz_chartorune
+	fz_chartorunen
 	fz_runetochar
 	fz_runelen
 	fz_runeidx
@@ -871,6 +930,8 @@ EXPORTS
 	fz_copy_rectangle
 	fz_parse_stext_options
 	fz_segment_stext_page
+	fz_paragraph_break
+	fz_table_hunt
 	fz_new_stext_device
 	fz_new_ocr_device
 	fz_open_reflowed_document
@@ -951,12 +1012,16 @@ EXPORTS
 	fz_save_pixmap_as_jpx
 	fz_new_png_band_writer
 	fz_new_buffer_from_image_as_png
+	fz_new_buffer_from_image_as_pbm
+	fz_new_buffer_from_image_as_pkm
 	fz_new_buffer_from_image_as_pnm
 	fz_new_buffer_from_image_as_pam
 	fz_new_buffer_from_image_as_psd
 	fz_new_buffer_from_image_as_jpeg
 	fz_new_buffer_from_image_as_jpx
 	fz_new_buffer_from_pixmap_as_png
+	fz_new_buffer_from_pixmap_as_pbm
+	fz_new_buffer_from_pixmap_as_pkm
 	fz_new_buffer_from_pixmap_as_pnm
 	fz_new_buffer_from_pixmap_as_pam
 	fz_new_buffer_from_pixmap_as_psd
@@ -1004,6 +1069,8 @@ EXPORTS
 	fz_new_pclm_writer_with_output
 	fz_new_cbz_writer
 	fz_new_cbz_writer_with_output
+	fz_new_csv_writer
+	fz_new_csv_writer_with_output
 	fz_new_pdfocr_writer
 	fz_new_pdfocr_writer_with_output
 	fz_pdfocr_writer_set_progress
@@ -1136,6 +1203,8 @@ EXPORTS
 	pdf_annot_has_open
 	pdf_annot_has_popup
 	pdf_annot_has_author
+	pdf_annot_has_rich_contents
+	pdf_annot_has_rich_defaults
 	pdf_annot_flags
 	pdf_annot_rect
 	pdf_annot_border
@@ -1156,6 +1225,8 @@ EXPORTS
 	pdf_annot_ink_list_stroke_count
 	pdf_annot_ink_list_stroke_vertex
 	pdf_set_annot_flags
+	pdf_annot_stamp_image_obj
+	pdf_set_annot_stamp_image_obj
 	pdf_set_annot_stamp_image
 	pdf_set_annot_rect
 	pdf_set_annot_border
@@ -1225,12 +1296,17 @@ EXPORTS
 	pdf_set_annot_callout_line
 	pdf_annot_callout_point
 	pdf_set_annot_callout_point
+	pdf_annot_has_default_appearance
 	pdf_parse_default_appearance_unmapped
 	pdf_parse_default_appearance
 	pdf_print_default_appearance
 	pdf_annot_default_appearance_unmapped
 	pdf_annot_default_appearance
 	pdf_set_annot_default_appearance
+	pdf_annot_rich_contents
+	pdf_set_annot_rich_contents
+	pdf_annot_rich_defaults
+	pdf_set_annot_rich_defaults
 	pdf_annot_request_synthesis
 	pdf_annot_request_resynthesis
 	pdf_annot_needs_resynthesis
@@ -1386,6 +1462,9 @@ EXPORTS
 	pdf_document_associated_file
 	pdf_count_page_associated_files
 	pdf_page_associated_file
+	pdf_load_object_labels
+	pdf_drop_object_labels
+	pdf_label_object
 	pdf_access_exec_menu_item_event
 	pdf_load_encoding
 	pdf_set_font_wmode
@@ -1679,6 +1758,7 @@ EXPORTS
 	pdf_add_journal_fragment
 	pdf_format_date
 	pdf_parse_date
+	pdf_is_image_stream
 	pdf_keep_page
 	pdf_drop_page
 	pdf_lookup_page_number
@@ -1724,6 +1804,7 @@ EXPORTS
 	pdf_redact_page
 	pdf_page_presentation
 	pdf_load_default_colorspaces
+	pdf_clip_page
 	pdf_update_default_colorspaces
 	pdf_sync_open_pages
 	pdf_sync_page
@@ -1753,8 +1834,10 @@ EXPORTS
 	pdf_purge_object_from_store
 	pdf_find_font_resource
 	pdf_insert_font_resource
+	pdf_find_colorspace_resource
+	pdf_insert_colorspace_resource
 	pdf_drop_resource_tables
-	pdf_purge_local_font_resources
+	pdf_purge_local_resources
 	pdf_eval_function
 	pdf_keep_function
 	pdf_drop_function
@@ -1770,6 +1853,7 @@ EXPORTS
 	pdf_is_jpx_image
 	pdf_load_image
 	pdf_add_image
+	pdf_add_colorspace
 	pdf_load_pattern
 	pdf_keep_pattern
 	pdf_drop_pattern
@@ -1793,6 +1877,7 @@ EXPORTS
 	pdf_add_new_dict
 	pdf_add_new_array
 	pdf_cache_object
+	pdf_object_exists
 	pdf_count_objects
 	pdf_resolve_indirect
 	pdf_resolve_indirect_chain
@@ -1832,8 +1917,6 @@ EXPORTS
 	pdf_xref_ensure_local_object
 	pdf_obj_is_incremental
 	pdf_repair_xref
-	pdf_repair_obj_stms
-	pdf_repair_trailer
 	pdf_ensure_solid_xref
 	pdf_mark_xref
 	pdf_clear_xref
@@ -1948,6 +2031,7 @@ EXPORTS
 	TessHOcrRendererCreate
 	TessHOcrRendererCreate2
 	TessAltoRendererCreate
+	TessPAGERendererCreate
 	TessTsvRendererCreate
 	TessPDFRendererCreate
 	TessUnlvRendererCreate
@@ -1963,7 +2047,6 @@ EXPORTS
 	TessResultRendererImageNum
 	TessBaseAPICreate
 	TessBaseAPIDelete
-	TessBaseAPIGetOpenCLDevice
 	TessBaseAPISetInputName
 	TessBaseAPISetInputImage
 	TessBaseAPIGetSourceYResolution
@@ -1990,6 +2073,7 @@ EXPORTS
 	TessBaseAPISetImage2
 	TessBaseAPISetSourceResolution
 	TessBaseAPISetRectangle
+	TessBaseAPIGetGradient
 	TessBaseAPIGetThresholdedImageScaleFactor
 	TessBaseAPIAnalyseLayout
 	TessBaseAPIRecognize
@@ -2000,6 +2084,7 @@ EXPORTS
 	TessBaseAPIGetUTF8Text
 	TessBaseAPIGetHOCRText
 	TessBaseAPIGetAltoText
+	TessBaseAPIGetPAGEText
 	TessBaseAPIGetTsvText
 	TessBaseAPIGetBoxText
 	TessBaseAPIGetLSTMBoxText

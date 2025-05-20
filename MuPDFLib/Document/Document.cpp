@@ -1,6 +1,7 @@
 #include "Document.h"
 #include "MuException.h"
-#include "Vcclr.h"
+#include <vcclr.h>
+using namespace System::Runtime::InteropServices;
 
 #pragma unmanaged
 static fz_document* OpenDocumentWithStream(fz_context* ctx, fz_stream* stream) {
@@ -43,7 +44,61 @@ DLLEXP int PdfSaveSnapshot(fz_context* ctx, pdf_document* doc, const wchar_t* fi
 	return 1;
 }
 
+static int GraftPages(fz_context* ctx, int pageTo, int numberOfPages, pdf_document* dest, pdf_document* src, int pageFrom)
+{
+	pdf_graft_map* map = pdf_new_graft_map(ctx, dest);
+	fz_try(ctx) {
+		if (pageTo < 0) {
+			for (int i = 0; i < numberOfPages; i++) {
+				pdf_graft_mapped_page(ctx, map, -1, src, pageFrom++);
+			}
+		}
+		else {
+			for (int i = 0; i < numberOfPages; i++) {
+				pdf_graft_mapped_page(ctx, map, pageTo++, src, pageFrom++);
+			}
+		}
+	}
+	fz_always(ctx)
+		pdf_drop_graft_map(ctx, map);
+	fz_catch(ctx)
+		return 0;
+	return 1;
+}
+
+static int GraftPage(fz_context* ctx, pdf_graft_map* map, int pageTo, pdf_document* src, int pageFrom) {
+	MuTry(ctx, pdf_graft_mapped_page(ctx, map, pageTo, src, pageFrom));
+}
+
 #pragma managed
+
+MuPDF::Document^ MuPDF::Document::Open(String^ filePath) {
+	Stream^ s = gcnew Stream(filePath);
+	try {
+		auto doc = gcnew Document(s->Ptr);
+		doc->FilePath = filePath;
+		return doc;
+	}
+	catch (Exception^) {
+		delete s;
+		throw;
+	}
+}
+
+MuPDF::Document^ MuPDF::Document::Open(array<Byte>^ memoryFile)
+{
+	Stream^ s = gcnew Stream(memoryFile);
+	try {
+		auto doc = gcnew Document(s->Ptr);
+		doc->FilePath = String::Empty;
+		return doc;
+	}
+	catch (Exception^) {
+		delete s;
+		throw;
+	}
+}
+
 MuPDF::Document::Document(fz_stream* stream) {
 	OpenStream(stream);
 }
@@ -90,9 +145,54 @@ MuPDF::PdfDictionary^ MuPDF::Document::NewPage(Box mediaBox, int rotate, PdfDict
 	return gcnew PdfDictionary(pdf_add_page(Context::Ptr, _pdf, mediaBox, rotate, resources ? resources->Ptr : NULL, b));
 }
 
+void MuPDF::Document::GraftPagesFrom(Document^ srcDoc, int pageFrom, int numberOfPages, int pageTo) {
+	if (!::GraftPages(Context::Ptr, pageTo, numberOfPages, _pdf, srcDoc->_pdf, pageFrom)) {
+		throw MuException::FromContext();
+	}
+	RefreshPageCount();
+}
+
+void MuPDF::Document::GraftPagesFrom(Document^ srcDoc, System::Collections::Generic::IEnumerable<int>^ srcPages, int pageTo)
+{
+	auto ctx = Context::Ptr;
+	pdf_graft_map* map = pdf_new_graft_map(ctx, _pdf);
+	auto src = srcDoc->_pdf;
+	MuException^ err = nullptr;
+	if (pageTo < 0) {
+		for each(int num in srcPages) {
+			if (!::GraftPage(ctx, map, -1, src, num)) {
+				err = MuException::FromContext();
+				goto RETURN;
+			}
+		}
+	}
+	else {
+		for each(int num in srcPages) {
+			if (!::GraftPage(ctx, map, pageTo++, src, num)) {
+				err = MuException::FromContext();
+				goto RETURN;
+			}
+		}
+	}
+	RETURN:
+	RefreshPageCount();
+	pdf_drop_graft_map(ctx, map);
+	if (err) {
+		throw MuException::FromContext();
+	}
+}
+
+void MuPDF::Document::SetPageLabel(int index, PageLabelStyle style, String^ prefix, int start)
+{
+	IntPtr p_prefix = Marshal::StringToHGlobalAnsi(prefix);
+	char* p = static_cast<char*>(p_prefix.ToPointer());
+	pdf_set_page_labels(Context::Ptr, _pdf, index, (pdf_page_label_style)style, p, start);
+	Marshal::FreeHGlobal(p_prefix);
+}
+
 void MuPDF::Document::Save(String^ filePath, WriterOptions^ options) {
 	pin_ptr<const wchar_t> p = PtrToStringChars(filePath);
-	pdf_write_options w = options->ToNative();
+	pdf_write_options w = options ? options->ToNative() : pdf_write_options();
 	auto r = PdfSaveDocument(Context::Ptr, _pdf, (const wchar_t*)p, (const pdf_write_options*)&w);
 	if (!r) {
 		throw MuException::FromContext();
@@ -133,21 +233,23 @@ pdf_write_options MuPDF::WriterOptions::ToNative() {
 	r.do_incremental = Incremental;
 	r.do_pretty = Pretty;
 	r.do_ascii = Ascii;
-	r.do_compress = Compress;
+	r.do_compress = (int)CompressionMode;
 	r.do_compress_images = CompressImages;
 	r.do_compress_fonts = CompressFonts;
 	r.do_decompress = Decompress;
-	r.do_garbage = Garbage;
+	r.do_garbage = (int)Garbage;
 	r.do_linear = Linear;
 	r.do_clean = Clean;
 	r.do_sanitize = Sanitize;
 	r.do_appearance = Appearance;
-	r.do_encrypt = Decrypt;
+	r.do_encrypt = (int)Encrypt;
 	r.dont_regenerate_id = DoNotRegenerateId;
 	r.do_snapshot = Snapshot;
 	r.do_preserve_metadata = PreserveMetadata;
 	r.do_use_objstms = UseObjectStreams;
 	r.compression_effort = CompressionEffort;
+	r.permissions = (int)Permissions;
+	r.do_labels = AddLabels;
 	if (OwnerPassword) {
 		System::Runtime::InteropServices::Marshal::Copy(OwnerPassword, 0, (IntPtr)(void*)&r.opwd_utf8, OwnerPassword->Length);
 	}
