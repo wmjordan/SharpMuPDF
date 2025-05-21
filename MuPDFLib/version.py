@@ -20,7 +20,7 @@ def main():
 
 	file = "AssemblyInfo.cpp"
 	content = open(file).read()
-	newContent = re.sub(r"(AssemblyFileVersion(?:Attribute?)\(\")\d+\.\d+\.\d+(\.)(\d+)(\"\))", rewriteRevision, content)
+	newContent = re.sub(r"(Assembly(?:File)?Version(?:Attribute)?\(\")\d+\.\d+\.\d+(\.)(\d+)(\"\))", rewriteRevision, content)
 	if newContent != content:
 		open(file, "wt").write(newContent)
 		print("rewrite " + file)
