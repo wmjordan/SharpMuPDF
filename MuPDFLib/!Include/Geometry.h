@@ -1,7 +1,4 @@
 #include "mupdf/fitz.h"
-#include "mupdf/pdf.h"
-#include <cfloat>
-#include <math.h>
 
 #ifndef __GEOMETRY
 #define __GEOMETRY
@@ -250,6 +247,9 @@ public:
 		pin_ptr<Matrix> p = &matrix;
 		return *(fz_matrix*)p;
 		//return { matrix.A,matrix.B,matrix.C,matrix.D,matrix.E,matrix.F };
+	}
+	static operator Matrix(fz_matrix matrix) {
+		return Matrix(matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f);
 	}
 };
 };

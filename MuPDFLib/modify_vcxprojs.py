@@ -73,21 +73,29 @@ def modify_libmupdf(root, ns):
 	if preprocessor_elements is not None:
 		for elem in preprocessor_elements:
 			preprocessors = elem.text.split(';')
-			# check if contains "TOFU;TOFU_CJK_EXT;"
+			# turn off fallback fonts
 			modified |= modify_preprocessor(preprocessors, "TOFU")
-			modified |= modify_preprocessor(preprocessors, "TOFU_CJK_EXT")
+			modified |= modify_preprocessor(preprocessors, "TOFU_CJK")
+			modified |= modify_preprocessor(preprocessors, "TOFU_BASE14")
+			modified |= modify_preprocessor(preprocessors, "TOFU_SIL")
+			modified |= modify_preprocessor(preprocessors, "TOFU_NOTO")
+			# turn off none-PDF features
 			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_CBZ", "0")
 			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_EPUB", "0")
 			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_FB2", "0")
-			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_HTML", "0")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_HTML", "1")
 			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_JS", "0")
 			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_MOBI", "0")
 			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_OFFICE", "0")
 			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_OCR_OUTPUT", "0")
 			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_ODT_OUTPUT", "0")
 			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_DOCX_OUTPUT", "0")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_IMG", "0")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_SVG", "0")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_BARCODE", "0")
 			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_TXT", "0")
 			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_XPS", "0")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_HYPHEN", "0")
 			if modified:
 				elem.text = ';'.join(preprocessors)
 

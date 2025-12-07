@@ -31,6 +31,7 @@ EXPORTS
 	fz_is_zip_archive
 	fz_open_zip_archive
 	fz_open_zip_archive_with_stream
+	fz_open_zip_archive_with_memory
 	fz_new_zip_writer
 	fz_new_zip_writer_with_output
 	fz_write_zip_entry
@@ -76,6 +77,7 @@ EXPORTS
 	fz_new_buffer_from_data
 	fz_new_buffer_from_shared_data
 	fz_new_buffer_from_copied_data
+	fz_new_buffer_from_printf
 	fz_clone_buffer
 	fz_new_buffer_from_base64
 	fz_resize_buffer
@@ -291,6 +293,7 @@ EXPORTS
 	fz_end_group
 	fz_begin_tile
 	fz_begin_tile_id
+	fz_begin_tile_tid
 	fz_end_tile
 	fz_render_flags
 	fz_set_default_colorspaces
@@ -469,8 +472,6 @@ EXPORTS
 	ft_error_string
 	ft_char_index
 	ft_name_index
-	fz_hb_lock
-	fz_hb_unlock
 	fz_enumerate_font_cmap
 	fz_calculate_font_ascender_descender
 	fz_ft_lock
@@ -510,6 +511,7 @@ EXPORTS
 	fz_translate_rect
 	fz_translate_irect
 	fz_contains_rect
+	fz_overlaps_rect
 	fz_transform_point
 	fz_transform_point_xy
 	fz_transform_vector
@@ -533,6 +535,7 @@ EXPORTS
 	fz_getopt_long
 	fz_getopt
 	fz_opt_from_list
+	fz_optpath
 	fz_purge_glyph_cache
 	fz_render_glyph_pixmap
 	fz_render_t3_glyph_direct
@@ -555,7 +558,13 @@ EXPORTS
 	fz_hash_filter
 
 
+	fz_new_hyphenator_from_stream
+	fz_register_hyphenator
+	fz_hyphenate_word
+	fz_drop_hyphenator
+	fz_lookup_hyphenator
 	fz_get_pixmap_from_image
+	fz_get_pixmap_mask_from_image
 	fz_get_unscaled_pixmap_from_image
 	fz_keep_image
 	fz_drop_image
@@ -565,6 +574,7 @@ EXPORTS
 	fz_new_image_from_compressed_buffer
 	fz_new_image_from_pixmap
 	fz_new_image_from_buffer
+	fz_new_jpx_image_from_buffer
 	fz_new_image_from_file
 	fz_drop_image_imp
 	fz_drop_image_base
@@ -575,6 +585,7 @@ EXPORTS
 	fz_compressed_image_type
 	fz_image_resolution
 	fz_image_orientation
+	fz_is_lossy_image
 	fz_compressed_image_buffer
 	fz_set_compressed_image_buffer
 	fz_pixmap_image_tile
@@ -699,6 +710,7 @@ EXPORTS
 	fz_packed_path_size
 	fz_pack_path
 	fz_clone_path
+	fz_path_is_empty
 	fz_currentpoint
 	fz_moveto
 	fz_lineto
@@ -725,6 +737,7 @@ EXPORTS
 	fz_string_from_linejoin
 	fz_path_is_rect
 	fz_path_is_rect_with_bounds
+	fz_path_is_closed
 	fz_pixmap_bbox
 	fz_pixmap_width
 	fz_pixmap_height
@@ -761,6 +774,7 @@ EXPORTS
 	fz_convert_pixmap
 	fz_is_pixmap_monochrome
 	fz_alpha_from_gray
+	fz_alpha_from_rgb
 	fz_decode_tile
 	fz_md5_pixmap
 	fz_clone_pixmap_area_with_different_seps
@@ -774,6 +788,10 @@ EXPORTS
 	fz_pool_strdup
 	fz_pool_size
 	fz_drop_pool
+	fz_new_pool_array_imp
+	fz_pool_array_append
+	fz_pool_array_lookup
+	fz_pool_array_len
 	fz_new_separations
 	fz_keep_separations
 	fz_drop_separations
@@ -812,6 +830,7 @@ EXPORTS
 	fz_store_scavenge_external
 	fz_shrink_store
 	fz_filter_store
+	fz_drop_drawn_tiles_for_document
 	fz_debug_store
 	fz_defer_reap_start
 	fz_defer_reap_end
@@ -911,6 +930,8 @@ EXPORTS
 	fz_drop_layout
 	fz_add_layout_line
 	fz_add_layout_char
+	fz_keep_stext_page
+	fz_stext_page_details_for_block
 	fz_new_stext_page
 	fz_drop_stext_page
 	fz_print_stext_page_as_html
@@ -930,11 +951,34 @@ EXPORTS
 	fz_copy_rectangle
 	fz_parse_stext_options
 	fz_segment_stext_page
+	fz_segment_stext_rect
 	fz_paragraph_break
 	fz_table_hunt
+	fz_table_hunt_within_bounds
 	fz_new_stext_device
 	fz_new_ocr_device
+	fz_new_ocr_device_with_options
 	fz_open_reflowed_document
+	fz_is_unicode_space_equivalent
+	fz_is_unicode_whitespace
+	fz_is_unicode_hyphen
+	fz_parse_search_options
+	fz_new_search
+	fz_search_set_options
+	fz_search_forwards
+	fz_search_backwards
+	fz_feed_search
+	fz_drop_search
+	fz_match_stext_page
+	fz_match_stext_page_cb
+	fz_new_stext_struct
+	fz_stext_page_block_iterator_begin
+	fz_stext_page_block_iterator_next
+	fz_stext_page_block_iterator_down
+	fz_stext_page_block_iterator_up
+	fz_stext_page_block_iterator_next_dfs
+	fz_stext_page_block_iterator_eod
+	fz_stext_page_block_iterator_eod_dfs
 	fz_fopen_utf8
 	fz_remove_utf8
 	fz_free_argv
@@ -968,22 +1012,35 @@ EXPORTS
 	fz_new_pixmap_from_page_number_with_separations
 	fz_new_pixmap_from_page_contents_with_separations
 	fz_fill_pixmap_from_display_list
+	fz_new_stext_page_from_page_with_cookie
 	fz_new_stext_page_from_page
 	fz_new_stext_page_from_page_number
 	fz_new_stext_page_from_chapter_page_number
 	fz_new_stext_page_from_display_list
+	fz_new_buffer_from_flattened_stext_page
 	fz_new_buffer_from_stext_page
 	fz_new_buffer_from_page
 	fz_new_buffer_from_page_number
 	fz_new_buffer_from_display_list
+	fz_new_buffer_from_flattened_page
+	fz_new_buffer_from_flattened_page_number
+	fz_new_buffer_from_flattened_display_list
 	fz_search_page
 	fz_search_page_number
 	fz_search_chapter_page_number
 	fz_search_display_list
+	fz_match_page
+	fz_match_page_number
+	fz_match_chapter_page_number
+	fz_match_display_list
 	fz_search_page_cb
 	fz_search_page_number_cb
 	fz_search_chapter_page_number_cb
 	fz_search_display_list_cb
+	fz_match_page_cb
+	fz_match_page_number_cb
+	fz_match_chapter_page_number_cb
+	fz_match_display_list_cb
 	fz_new_display_list_from_svg
 	fz_new_image_from_svg
 	fz_new_display_list_from_svg_xml
@@ -1037,7 +1094,9 @@ EXPORTS
 	fz_write_bitmap_as_pbm
 	fz_new_pbm_band_writer
 	fz_save_pixmap_as_pbm
+	fz_write_pixmap_as_pkm
 	fz_save_bitmap_as_pkm
+	fz_write_pixmap_as_pbm
 	fz_write_bitmap_as_pkm
 	fz_new_pkm_band_writer
 	fz_save_pixmap_as_pkm
@@ -1088,6 +1147,7 @@ EXPORTS
 	fz_close_document_writer
 	fz_drop_document_writer
 	fz_new_pixmap_writer
+	fz_new_pixmap_writer_with_output
 	fz_new_document_writer_of_size
 	fz_parse_xml
 	fz_parse_xml_stream
@@ -1121,6 +1181,7 @@ EXPORTS
 	fz_xml_find_dfs_top
 	fz_xml_find_next_dfs
 	fz_xml_find_next_dfs_top
+	fz_new_text_from_xml
 	fz_dom_body
 	fz_dom_document_element
 	fz_dom_create_element
@@ -1207,6 +1268,7 @@ EXPORTS
 	pdf_annot_has_rich_defaults
 	pdf_annot_flags
 	pdf_annot_rect
+	pdf_annot_display_rect
 	pdf_annot_border
 	pdf_annot_border_style
 	pdf_annot_border_width
@@ -1324,7 +1386,6 @@ EXPORTS
 	pdf_is_embedded_file
 	pdf_add_embedded_file
 	pdf_get_filespec_params
-	pdf_get_embedded_file_params
 	pdf_load_embedded_file_contents
 	pdf_verify_embedded_file_checksum
 	pdf_lookup_dest
@@ -1348,6 +1409,7 @@ EXPORTS
 	pdf_apply_redaction
 	pdf_clean_file
 	pdf_rearrange_pages
+	pdf_vectorize_pages
 	pdf_new_cmap
 	pdf_keep_cmap
 	pdf_drop_cmap
@@ -1399,6 +1461,7 @@ EXPORTS
 	pdf_open_document_with_stream
 	pdf_drop_document
 	pdf_keep_document
+	pdf_check_document
 	pdf_specifics
 	pdf_document_from_fz_document
 	pdf_page_from_fz_page
@@ -1416,11 +1479,15 @@ EXPORTS
 	pdf_layer_is_enabled
 	pdf_enable_layer
 	pdf_layer_config_info
+	pdf_layer_config_creator
+	pdf_layer_config_name
 	pdf_select_layer_config
 	pdf_count_layer_config_ui
 	pdf_select_layer_config_ui
 	pdf_deselect_layer_config_ui
 	pdf_toggle_layer_config_ui
+	pdf_layer_config_ui_type_to_string
+	pdf_layer_config_ui_type_from_string
 	pdf_layer_config_ui_info
 	pdf_set_layer_config_as_default
 	pdf_create_document
@@ -1519,12 +1586,14 @@ EXPORTS
 	pdf_keep_processor
 	pdf_close_processor
 	pdf_drop_processor
+	pdf_lookup_resource
 	pdf_count_q_balance
 	pdf_new_run_processor
 	pdf_new_buffer_processor
 	pdf_reset_processor
 	pdf_new_output_processor
 	pdf_new_sanitize_filter
+	pdf_new_vectorize_filter
 	pdf_filter_xobject_instance
 	pdf_processor_push_resources
 	pdf_processor_pop_resources
@@ -1766,6 +1835,7 @@ EXPORTS
 	pdf_count_pages_imp
 	pdf_lookup_page_obj
 	pdf_lookup_page_loc
+	pdf_set_page_tree_cache
 	pdf_load_page_tree
 	pdf_drop_page_tree
 	pdf_drop_page_tree_internal
@@ -1805,6 +1875,7 @@ EXPORTS
 	pdf_page_presentation
 	pdf_load_default_colorspaces
 	pdf_clip_page
+	pdf_vectorize_page
 	pdf_update_default_colorspaces
 	pdf_sync_open_pages
 	pdf_sync_page
@@ -1848,6 +1919,7 @@ EXPORTS
 	pdf_is_tint_colorspace
 	pdf_load_shading
 	pdf_sample_shade_function
+	pdf_guess_colorspace_components
 	pdf_recolor_shade
 	pdf_load_inline_image
 	pdf_is_jpx_image
@@ -1896,6 +1968,7 @@ EXPORTS
 	pdf_load_compressed_inline_image
 	pdf_open_stream_with_offset
 	pdf_open_contents_stream
+	pdf_load_image_stream
 	pdf_version
 	pdf_trailer
 	pdf_set_populating_xref_trailer

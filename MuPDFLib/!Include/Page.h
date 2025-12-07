@@ -18,10 +18,71 @@ public enum class PageBoxType {
 	Unknown
 };
 
+public enum class RedactImageMethod
+{
+	/// <summary>
+	/// Do not change images at all.
+	/// </summary>
+	None,
+	/// <summary>If the image intrudes across the redaction region(even if clipped), remove it.</summary>
+	Remove,
+	/// <summary>If the image intrudes across the redaction region(even if clipped), replace the bit that intrudes with black pixels..</summary>
+	RemovePixels,
+	/// <summary>
+	/// If the image, when clipped, intrudes across the redaction
+	///  region, remove it completely.Note: clipped is a rough estimate
+	///  based on the bbox of clipping paths.
+	///
+	///  Essentially this says "remove any image that has visible parts
+	///  that extend into the redaction region".
+	/// 
+	/// This method can effectively 'leak' invisible information during
+	///  the redaction phase, so should be used with caution.
+	/// </summary>
+	RemoveUnlessInvisible
+};
+
+public enum class RedactLineArtMethod {
+	None,
+	RemoveIfCovered,
+	RemoveIfTouched
+};
+
+public enum class RedactTextMethod {
+	/* Remove any text that overlaps with the redaction region,
+	 * however slightly. This is the default option, and is the
+	 * correct option for secure behaviour. */
+	Remove,
+	/* Do not remove any text at all as part of this redaction
+	 * operation. Using this option is INSECURE! Use at your own
+	 * risk. */
+	Keep
+};
+
+public ref class PdfRedactOptions {
+public:
+	property bool BlackBoxes;
+	property RedactImageMethod ImageMethod;
+	property RedactLineArtMethod LineArt;
+	property RedactTextMethod Text;
+internal:
+	// implicitly convert PdfRedactOptions to pdf_redact_options
+	operator pdf_redact_options() {
+		pdf_redact_options opts;
+		opts.black_boxes = BlackBoxes;
+		opts.image_method = (int)ImageMethod;
+		opts.line_art = (int)LineArt;
+		opts.text = (int)Text;
+		return opts;
+	}
+};
+
+
 public ref class Page sealed : IDisposable, IEquatable<Page^> {
 public:
 	property int PageNumber {
-		int get() { return _pageNumber; }
+		// we don't use _pageNumber here, since pages can be reordered after editing operations
+		int get() { return pdf_lookup_page_number(Context::Ptr, _pdfPage->doc, _pdfPage->obj); }
 	}
 
 	/// <summary>
@@ -183,6 +244,9 @@ internal:
 	};
 	~Page() {
 		ReleaseHandle();
+	}
+	property pdf_page* Ptr {
+		pdf_page* get() { return _pdfPage; }
 	}
 	property pdf_obj* PagePtr {
 		pdf_obj* get() { return _pdfPage->obj; }

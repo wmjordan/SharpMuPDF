@@ -44,6 +44,7 @@ Kind PdfObject::TypeKind::get() {
 };
 
 PdfObject^ PdfObject::Wrap(pdf_obj* obj, bool resolve) {
+	START:
 	if (obj == PDF_NULL) {
 		return (PdfObject^)PdfNull::Instance;
 	}
@@ -64,9 +65,14 @@ PdfObject^ PdfObject::Wrap(pdf_obj* obj, bool resolve) {
 	case PDF_ARRAY: return gcnew PdfArray(obj);
 	case PDF_DICT: return gcnew PdfDictionary(obj);
 	case PDF_INDIRECT:
-		return resolve
-			? pdf_is_stream(Context::Ptr, obj) ? gcnew PdfStream(obj) : Wrap(pdf_resolve_indirect(Context::Ptr, obj))
-			: gcnew PdfReference(obj);
+		if (resolve) {
+			if (pdf_is_stream(Context::Ptr, obj)) {
+				return gcnew PdfStream(obj);
+			}
+			obj = pdf_resolve_indirect_chain(Context::Ptr, obj);
+			goto START;
+		}
+		return gcnew PdfReference(obj);
 	}
 	throw gcnew MuException("Unexpected object kind: " + obj->kind.ToString());
 }
@@ -94,6 +100,18 @@ pdf_obj* PdfContainer::NewPdfString(String^ text) {
 MAKE_STRING:
 	pb = &b[0];
 	return pdf_new_string(Ctx, (const char*)(void*)pb, b->Length);
+}
+
+PdfObject^ MuPDF::PdfDictionary::GetValue(String^ key) {
+	EncodeUTF8(key, p)
+	pdf_obj* v = pdf_dict_gets(Context::Ptr, Ptr, (const char*)p);
+	return Wrap(v);
+}
+
+PdfObject^ MuPDF::PdfDictionary::GetObject(String^ key) {
+	EncodeUTF8(key, p)
+	pdf_obj* v = pdf_dict_gets(Context::Ptr, Ptr, (const char*)p);
+	return Wrap(v, true);
 }
 
 PdfObject^ PdfDictionary::Locate(...array<PdfNames>^ names) {
@@ -126,7 +144,10 @@ array<Byte>^ PdfString::GetBytes() {
 		throw gcnew System::InsufficientMemoryException("String length larger than INT_MAX");
 	}
 	array<Byte>^ r = gcnew array<Byte>((int)(l));
-	memcpy(&r, b, l);
+	if (l) {
+		pin_ptr<unsigned char> pb = &r[0];
+		memcpy(pb, b, l);
+	}
 	return r;
 }
 
@@ -159,4 +180,9 @@ void PdfStream::SetBytes(array<Byte>^ data, bool isCompressed) {
 	fz_buffer* b = fz_new_buffer_from_copied_data(ctx, d, data->Length);
 	pdf_update_stream(ctx, pdf_pin_document(ctx, Ptr), Ptr, b, isCompressed);
 	fz_free(ctx, b);
+}
+
+String^ MuPDF::PdfName::GetText() {
+	auto b = pdf_to_name(Ctx, Ptr);
+	return DecodeUTF8(b);
 }

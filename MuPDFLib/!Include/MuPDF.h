@@ -13,6 +13,8 @@
 #include "Page.h"
 #include "Document.h"
 #include "Stream.h"
+#include "Image.h"
+#include "FontDescriptor.h"
 
 #ifndef DLLEXP
 #define DLLEXP extern "C" __declspec(dllexport)

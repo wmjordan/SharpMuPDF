@@ -14,9 +14,9 @@ using namespace System::Security::Permissions;
 
 [assembly:AssemblyCopyrightAttribute(COPYRIGHT)];
 
-[assembly:AssemblyVersion("2.1.26.0")];
+[assembly:AssemblyVersion("2.1.27.0")];
 
 //[assembly:AssemblyVersion("2.0.*")]
-[assembly:AssemblyFileVersion("2.1.26.0")]
+[assembly:AssemblyFileVersion("2.1.27.0")]
 
 [assembly:ComVisible(false)];

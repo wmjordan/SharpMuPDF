@@ -28,4 +28,24 @@
 			return (int)(IntPtr)OPtr; \
 		}
 
+#define StaticMethodToFunctionPointer(method, TDelegate, TFuncPointer, staticHandle, funcPointer) \
+    { \
+        auto d = gcnew TDelegate(&method); \
+        staticHandle = System::Runtime::InteropServices::GCHandle::Alloc(d); \
+        funcPointer = static_cast<TFuncPointer*>(System::Runtime::InteropServices::Marshal::GetFunctionPointerForDelegate(d).ToPointer()); \
+    };
+
+#define InstanceMethodToFunctionPointer(instance, methodName, TDelegate, TFuncPointer, handle, funcPointer) \
+    { \
+        auto d = gcnew TDelegate(instance, &methodName); \
+        handle = System::Runtime::InteropServices::GCHandle::Alloc(d); \
+        funcPointer = static_cast<TFuncPointer*>(System::Runtime::InteropServices::Marshal::GetFunctionPointerForDelegate(d).ToPointer()); \
+    };
+
+#define DecodeUTF8(chars) gcnew String(chars, 0, strlen(chars), System::Text::Encoding::UTF8)
+
+#define EncodeUTF8(text, ptr) pin_ptr<unsigned char> ptr = &System::Text::Encoding::UTF8->GetBytes(text)[0];
+
+#define FreeHandle(gchandle) if(gchandle.IsAllocated) gchandle.Free();
+
 #endif // !__OBJWRAPPER

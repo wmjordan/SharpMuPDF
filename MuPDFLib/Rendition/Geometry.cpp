@@ -1,4 +1,5 @@
 #include "Geometry.h"
+#include <cfloat>
 
 MuPDF::Box MuPDF::Box::Transform(Matrix matrix) {
 	return fz_transform_rect(*this, matrix);

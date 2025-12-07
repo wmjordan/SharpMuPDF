@@ -1,6 +1,5 @@
 #pragma once
 #include "mupdf/fitz.h"
-#include "mupdf/pdf.h"
 #include "MuPDF.h"
 
 #ifndef __COLORSPACE
@@ -19,8 +18,6 @@ public enum class ColorspaceKind {
 
 public ref class Colorspace sealed {
 public:
-	Colorspace(fz_colorspace* colorspace) : _colorspace(colorspace) {};
-
 	property bool IsIndexed {
 		bool get() {
 			return fz_colorspace_is_indexed(Context::Ptr, _colorspace);
@@ -57,6 +54,7 @@ public:
 		}
 	}
 internal:
+	Colorspace(fz_colorspace* colorspace) : _colorspace(colorspace) {};
 	property fz_colorspace* Pointer {
 		fz_colorspace* get() {
 			return _colorspace;

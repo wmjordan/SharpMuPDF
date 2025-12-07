@@ -1,5 +1,4 @@
 #include "mupdf/fitz.h"
-#include "mupdf/pdf.h"
 #include "MuPDF.h"
 
 #ifndef __PIXMAP

@@ -51,6 +51,21 @@
     <ClCompile Include="Rendition\Geometry.cpp">
       <Filter>Rendition</Filter>
     </ClCompile>
+    <ClCompile Include="Rendition\Image.cpp">
+      <Filter>Rendition</Filter>
+    </ClCompile>
+    <ClCompile Include="Document\Processor.cpp">
+      <Filter>Document</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendition\FontDescriptor.cpp">
+      <Filter>Rendition</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendition\JBIG2Encode.cpp">
+      <Filter>Rendition</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendition\JBIG2Decode.cpp">
+      <Filter>Rendition</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="!Include\MuException.h">
@@ -98,6 +113,18 @@
     </ClInclude>
     <ClInclude Include="Context.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="!Include\Image.h">
+      <Filter>Rendition</Filter>
+    </ClInclude>
+    <ClInclude Include="!Include\Processor.h">
+      <Filter>Document</Filter>
+    </ClInclude>
+    <ClInclude Include="!Include\FontDescriptor.h">
+      <Filter>Rendition</Filter>
+    </ClInclude>
+    <ClInclude Include="!Include\JBIG2Codec.h">
+      <Filter>Rendition</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MuPDFLib.rc">

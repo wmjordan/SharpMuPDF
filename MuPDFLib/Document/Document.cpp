@@ -14,6 +14,53 @@ static fz_page* LoadPage(fz_context* ctx, fz_document* doc, int pn) {
 	MuTryReturn(ctx, fz_load_page(ctx, doc, pn), p);
 }
 
+static int LookupPageNumber(fz_context* ctx, pdf_document* doc, pdf_obj* pageRef) {
+	int n = -1;
+	fz_try(ctx) {
+		n = pdf_lookup_page_number(ctx, doc, pageRef);
+	}
+	fz_catch(ctx) {
+		n = -2;
+	}
+	return n;
+}
+
+static pdf_obj* LoadPageDict(fz_context* ctx, pdf_document* doc, int pn) {
+	pdf_obj* p;
+	MuTryReturn(ctx, pdf_lookup_page_obj(ctx, doc, pn), p);
+}
+
+static fz_rect BoundPage(fz_context* ctx, pdf_document* doc, int pn) {
+	fz_matrix page_ctm;
+	fz_rect rect;
+	fz_try(ctx) {
+		pdf_obj* p = pdf_lookup_page_obj(ctx, doc, pn);
+		pdf_page_obj_transform_box(ctx, p, &rect, &page_ctm, FZ_CROP_BOX);
+		rect = fz_transform_rect(rect, page_ctm);
+	}
+	fz_catch(ctx) {
+		rect = fz_invalid_rect;
+	}
+	return rect;
+}
+
+static bool DeleteObject(fz_context* ctx, pdf_document* doc, int num) {
+	MuTry(ctx, pdf_delete_object(ctx, doc, num));
+}
+
+static bool LoadNameTree(fz_context* ctx, pdf_document* doc, pdf_obj* name, pdf_obj** nameTree) {
+	bool r;
+	fz_try(ctx) {
+		*nameTree = pdf_load_name_tree(ctx, doc, name);
+		r = true;
+	}
+	fz_catch(ctx) {
+		*nameTree = PDF_NULL;
+		r = false;
+	}
+	return r;
+}
+
 DLLEXP int PdfSaveDocument(fz_context* ctx, pdf_document* doc, const wchar_t* filePath, const pdf_write_options* options) {
 	char* utf8path = NULL;
 	fz_try(ctx) {
@@ -72,7 +119,21 @@ static int GraftPage(fz_context* ctx, pdf_graft_map* map, int pageTo, pdf_docume
 
 #pragma managed
 
-MuPDF::Document^ MuPDF::Document::Open(String^ filePath) {
+using namespace MuPDF;
+
+PdfDictionary^ Document::Trailer::get() {
+	return gcnew PdfDictionary(_trailer);
+}
+
+PdfDictionary^ Document::Root::get() {
+	return gcnew PdfDictionary(pdf_dict_get(Context::Ptr, _trailer, PDF_NAME(Root)));
+}
+
+PdfDocumentInfo^ Document::Info::get() {
+	return gcnew PdfDocumentInfo(pdf_dict_get(Context::Ptr, _trailer, PDF_NAME(Info)));
+}
+
+Document^ Document::Open(String^ filePath) {
 	Stream^ s = gcnew Stream(filePath);
 	try {
 		auto doc = gcnew Document(s->Ptr);
@@ -85,7 +146,7 @@ MuPDF::Document^ MuPDF::Document::Open(String^ filePath) {
 	}
 }
 
-MuPDF::Document^ MuPDF::Document::Open(array<Byte>^ memoryFile)
+Document^ Document::Open(array<Byte>^ memoryFile)
 {
 	Stream^ s = gcnew Stream(memoryFile);
 	try {
@@ -99,11 +160,11 @@ MuPDF::Document^ MuPDF::Document::Open(array<Byte>^ memoryFile)
 	}
 }
 
-MuPDF::Document::Document(fz_stream* stream) {
+Document::Document(fz_stream* stream) {
 	OpenStream(stream);
 }
 
-void MuPDF::Document::OpenStream(fz_stream* stream) {
+void Document::OpenStream(fz_stream* stream) {
 	fz_context* ctx = Context::Ptr;
 	fz_document* doc = OpenDocumentWithStream(ctx, stream);
 	if (doc) {
@@ -118,7 +179,7 @@ void MuPDF::Document::OpenStream(fz_stream* stream) {
 	throw MuException::FromContext();
 }
 
-void MuPDF::Document::InitTrailer() {
+void Document::InitTrailer() {
 	fz_context* ctx = Context::Ptr;
 	_pdf = pdf_document_from_fz_document(ctx, _document);
 	if (!_pdf) {
@@ -131,7 +192,7 @@ void MuPDF::Document::InitTrailer() {
 	_pageCount = fz_count_pages(ctx, _document);
 }
 
-MuPDF::Page^ MuPDF::Document::LoadPage(int pageNumber) {
+Page^ Document::LoadPage(int pageNumber) {
 	fz_page* p = ::LoadPage(Context::Ptr, _document, pageNumber);
 	if (p) {
 		return gcnew Page(p, pageNumber);
@@ -139,20 +200,62 @@ MuPDF::Page^ MuPDF::Document::LoadPage(int pageNumber) {
 	throw MuException::FromContext();
 }
 
-MuPDF::PdfDictionary^ MuPDF::Document::NewPage(Box mediaBox, int rotate, PdfDictionary^ resources, array<Byte>^ contents) {
+int Document::LookupPageNumber(PdfObject^ pageObj) {
+	int n = ::LookupPageNumber(Context::Ptr, _pdf, pageObj->Ptr);
+	if (n == -2) {
+		throw MuException::FromContext();
+	}
+	return n;
+}
+
+PdfDictionary^ Document::GetPageDictionary(int pageNumber) {
+	auto p = ::LoadPageDict(Context::Ptr, _pdf, pageNumber);
+	if (p) {
+		return gcnew PdfDictionary(p);
+	}
+	throw MuException::FromContext();
+}
+
+Box Document::BoundPage(int pageNumber) {
+	return ::BoundPage(Context::Ptr, _pdf, pageNumber);
+}
+
+PdfDictionary^ Document::NewPage(Box mediaBox, int rotate, PdfDictionary^ resources, array<Byte>^ contents) {
 	pin_ptr<Byte> c = &contents[0];
 	auto b = fz_new_buffer_from_copied_data(Context::Ptr, c, contents->Length);
 	return gcnew PdfDictionary(pdf_add_page(Context::Ptr, _pdf, mediaBox, rotate, resources ? resources->Ptr : NULL, b));
 }
 
-void MuPDF::Document::GraftPagesFrom(Document^ srcDoc, int pageFrom, int numberOfPages, int pageTo) {
+PdfDictionary^ Document::NewDictionary(int capacity) {
+	return gcnew PdfDictionary(pdf_new_dict(Context::Ptr, _pdf, capacity));
+}
+
+PdfArray^ Document::NewArray(int capacity) {
+	return gcnew PdfArray(pdf_new_array(Context::Ptr, _pdf, capacity));
+}
+
+PdfArray^ Document::NewBox(Box box) {
+	return gcnew PdfArray(pdf_new_rect(Context::Ptr, _pdf, box));
+}
+
+PdfArray^ Document::NewMatrix(Matrix matrix) {
+	return gcnew PdfArray(pdf_new_matrix(Context::Ptr, _pdf, matrix));
+}
+
+void Document::DeleteObject(int objNum) {
+	if (!::DeleteObject(Context::Ptr, _pdf, objNum)) {
+		throw MuException::FromContext();
+	}
+}
+
+void Document::GraftPagesFrom(Document^ srcDoc, int pageFrom, int numberOfPages, int pageTo) {
 	if (!::GraftPages(Context::Ptr, pageTo, numberOfPages, _pdf, srcDoc->_pdf, pageFrom)) {
 		throw MuException::FromContext();
 	}
 	RefreshPageCount();
 }
 
-void MuPDF::Document::GraftPagesFrom(Document^ srcDoc, System::Collections::Generic::IEnumerable<int>^ srcPages, int pageTo)
+void Document::GraftPagesFrom(Document^ srcDoc, System::Collections::Generic::IEnumerable<int>^ srcPages, int pageTo)
 {
 	auto ctx = Context::Ptr;
 	pdf_graft_map* map = pdf_new_graft_map(ctx, _pdf);
@@ -182,7 +285,7 @@ void MuPDF::Document::GraftPagesFrom(Document^ srcDoc, System::Collections::Gene
 	}
 }
 
-void MuPDF::Document::SetPageLabel(int index, PageLabelStyle style, String^ prefix, int start)
+void Document::SetPageLabel(int index, PageLabelStyle style, String^ prefix, int start)
 {
 	IntPtr p_prefix = Marshal::StringToHGlobalAnsi(prefix);
 	char* p = static_cast<char*>(p_prefix.ToPointer());
@@ -190,7 +293,20 @@ void MuPDF::Document::SetPageLabel(int index, PageLabelStyle style, String^ pref
 	Marshal::FreeHGlobal(p_prefix);
 }
 
-void MuPDF::Document::Save(String^ filePath, WriterOptions^ options) {
+PdfDictionary^ Document::LoadNameTree(PdfNames name) {
+	auto ctx = Context::Ptr;
+	pdf_obj* r;
+	if (!::LoadNameTree(ctx, _pdf, (pdf_obj*)name, &r)) {
+		throw MuException::FromContext();
+	}
+	return pdf_is_dict(ctx, r) ? gcnew PdfDictionary(r, false) : nullptr;
+}
+
+PdfObject^ Document::GetAssociatedFile(int index) {
+	return MuPDF::PdfObject::Wrap(pdf_document_associated_file(Context::Ptr, _pdf, index));
+}
+
+void Document::Save(String^ filePath, WriterOptions^ options) {
 	pin_ptr<const wchar_t> p = PtrToStringChars(filePath);
 	pdf_write_options w = options ? options->ToNative() : pdf_write_options();
 	auto r = PdfSaveDocument(Context::Ptr, _pdf, (const wchar_t*)p, (const pdf_write_options*)&w);
@@ -199,7 +315,7 @@ void MuPDF::Document::Save(String^ filePath, WriterOptions^ options) {
 	}
 }
 
-void MuPDF::Document::SaveSnapshot(String^ filePath) {
+void Document::SaveSnapshot(String^ filePath) {
 	pin_ptr<const wchar_t> p = PtrToStringChars(filePath);
 	auto r = PdfSaveSnapshot(Context::Ptr, _pdf, (const wchar_t*)p);
 	if (!r) {
@@ -207,14 +323,14 @@ void MuPDF::Document::SaveSnapshot(String^ filePath) {
 	}
 }
 
-bool MuPDF::Document::CheckPassword(String^ password) {
-	const char* c = (char*)(void*)System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(password);
+bool Document::CheckPassword(String^ password) {
+	const char* c = (char*)(void*)Marshal::StringToHGlobalAnsi(password);
 	int r = fz_authenticate_password(Context::Ptr, _document, c);
 	delete c;
 	return r;
 }
 
-void MuPDF::Document::Reopen() {
+void Document::Reopen() {
 	if (!_path) {
 		throw gcnew System::InvalidOperationException("Could not reopen a document without path");
 	}
@@ -228,7 +344,17 @@ void MuPDF::Document::Reopen() {
 	}
 }
 
-pdf_write_options MuPDF::WriterOptions::ToNative() {
+void Document::ReleaseHandle() {
+	fz_context* ctx = Context::Ptr;
+	fz_drop_document(ctx, _document);
+	fz_drop_stream(ctx, _stream);
+	_document = NULL;
+	_pdf = NULL;
+	_trailer = NULL;
+	_stream = NULL;
+}
+
+pdf_write_options WriterOptions::ToNative() {
 	pdf_write_options r{};
 	r.do_incremental = Incremental;
 	r.do_pretty = Pretty;

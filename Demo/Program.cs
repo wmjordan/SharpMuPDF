@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -63,6 +61,10 @@ namespace Demo
 								using (var bmp = RenderPage(doc, cookie, p, b)) {
 									Console.WriteLine("Saving picture: " + (i + 1) + ".png");
 									bmp.Save((i + 1) + ".png"); // saves the bitmap to a file
+								}
+								using (var proc = new ProcessorLogger(pageInfo)) {
+									pageInfo.WriteLine("Contents:");
+									proc.ProcessPageContent(doc, p);
 								}
 							}
 						}

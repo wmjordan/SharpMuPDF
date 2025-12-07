@@ -1,5 +1,4 @@
 #include "mupdf/fitz.h"
-#include "mupdf/pdf.h"
 
 using namespace System;
 using namespace System::Runtime::InteropServices;
@@ -44,13 +43,15 @@ public:
 
 	static Colorspace^ GetColorspace(ColorspaceKind kind);
 
+	static void SetErrorCallback(Action<bool, String^>^ callback);
+
 internal:
-	static property Context^ Instance {
+	static property Context^ Current {
 		Context ^ get();
 	}
 
 	static property fz_context* Ptr {
-		fz_context* get() { return Instance->_context; }
+		fz_context* get() { return Current->_context; }
 	}
 
 	static fz_colorspace* GetFzColorspace(ColorspaceKind kind);
@@ -79,6 +80,10 @@ private:
 	}
 
 	void ReleaseHandle();
+
+	static GCHandle _errorCallbackHandle;
+	static Action<bool, String^>^ _errorCallback;
+	static void ErrorCallback(bool isError, const char* message);
 };
 
 };

@@ -19,6 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\jbig2enc\jbig2enc.vcxproj">
+      <Project>{3817693d-2cb1-41f6-b5b8-5493a600a835}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\mupdf\platform\win32\libmupdf.vcxproj">
       <Project>{5f615f91-dff8-4f05-bf48-6222b7d86519}</Project>
     </ProjectReference>
@@ -30,14 +33,19 @@
     <None Include="version.py" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Rendition\JBIG2Decode.cpp" />
+    <ClCompile Include="Rendition\JBIG2Encode.cpp" />
+    <ClCompile Include="Rendition\FontDescriptor.cpp" />
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="Context.cpp" />
     <ClCompile Include="Document\PdfObject.cpp" />
+    <ClCompile Include="Document\Processor.cpp" />
     <ClCompile Include="Rendition\Colorspace.cpp" />
     <ClCompile Include="Rendition\Device.cpp" />
     <ClCompile Include="Document\Document.cpp" />
     <ClCompile Include="Document\Page.cpp" />
     <ClCompile Include="Rendition\Geometry.cpp" />
+    <ClCompile Include="Rendition\Image.cpp" />
     <ClCompile Include="Rendition\Pixmap.cpp" />
     <ClCompile Include="Document\Stream.cpp" />
     <ClCompile Include="Rendition\TextPage.cpp" />
@@ -46,13 +54,17 @@
     <ClInclude Include="!Include\Colorspace.h" />
     <ClInclude Include="!Include\Device.h" />
     <ClInclude Include="!Include\Document.h" />
+    <ClInclude Include="!Include\FontDescriptor.h" />
     <ClInclude Include="!Include\Geometry.h" />
+    <ClInclude Include="!Include\Image.h" />
+    <ClInclude Include="!Include\JBIG2Codec.h" />
     <ClInclude Include="!Include\MuException.h" />
     <ClInclude Include="!Include\MuPDF.h" />
     <ClInclude Include="!Include\name-table.h" />
     <ClInclude Include="!Include\Page.h" />
     <ClInclude Include="!Include\PdfObject.h" />
     <ClInclude Include="!Include\Pixmap.h" />
+    <ClInclude Include="!Include\Processor.h" />
     <ClInclude Include="!Include\Stream.h" />
     <ClInclude Include="!Include\Collection.h" />
     <ClInclude Include="!Include\TextPage.h" />
@@ -69,7 +81,7 @@
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{7ac327e2-05d5-4acc-9400-c78c183de505}</ProjectGuid>
     <RootNamespace>MuPDFLib</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformMinVersion>7.0</WindowsTargetPlatformMinVersion>
     <TargetFrameworkVersion>4.0</TargetFrameworkVersion>
   </PropertyGroup>
@@ -77,14 +89,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>true</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>true</CLRSupport>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -92,14 +104,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>true</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>true</CLRSupport>
@@ -148,7 +160,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>FZ_DLL;WIN32;_DEBUG;MUPDFLIB_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../mupdf/include;!Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../mupdf/include;../jbig2enc/src;../mupdf/thirdparty/jbig2dec;!Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/Zc:twoPhase-</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -168,7 +181,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>FZ_DLL;WIN32;NDEBUG;MUPDFLIB_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../mupdf/include;!Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../mupdf/include;../jbig2enc/src;../mupdf/thirdparty/jbig2dec;!Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/Zc:twoPhase-</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -190,7 +204,8 @@ Python "$(ProjectDir)version.py"</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>FZ_DLL;_DEBUG;MUPDFLIB_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../mupdf/include;!Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../mupdf/include;../jbig2enc/src;../mupdf/thirdparty/jbig2dec;!Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/Zc:twoPhase-</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -211,7 +226,8 @@ Python "$(ProjectDir)version.py"</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>FZ_DLL;NDEBUG;MUPDFLIB_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../mupdf/include;!Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../mupdf/include;../jbig2enc/src;../mupdf/thirdparty/jbig2dec;!Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/Zc:twoPhase-</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

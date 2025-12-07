@@ -1,5 +1,4 @@
 #include "mupdf/fitz.h"
-#include "mupdf/pdf.h"
 #include "MuPDF.h"
 
 #ifndef __DOCUMENT
@@ -16,6 +15,9 @@ enum class PageLabelStyle;
 
 public ref class Document sealed : IDisposable, IEquatable<Document^> {
 public:
+	property int Chapters {
+		int get() { return fz_count_chapters(Context::Ptr, _document); }
+	}
 	property int PageCount {
 		int get() {
 			return _pageCount < 0
@@ -44,6 +46,9 @@ public:
 	property int IncrementalSectionCount {
 		int get() { return _pdf->num_incremental_sections; }
 	}
+	property int XrefLength {
+		int get() { return pdf_xref_len(Context::Ptr, _pdf); }
+	}
 	property int XrefSectionCount {
 		int get() { return _pdf->num_xref_sections; }
 	}
@@ -55,9 +60,6 @@ public:
 	}
 	property bool RepairAttempted {
 		bool get() { return _pdf->repair_attempted; }
-	}
-	property bool PageTreeBroken {
-		bool get() { return _pdf->page_tree_broken; }
 	}
 	property bool HasUnsavedChanges {
 		bool get() { return pdf_has_unsaved_changes(Context::Ptr, _pdf); }
@@ -76,19 +78,13 @@ public:
 		internal: void set(String^ value) { _path = value; }
 	}
 	property PdfDictionary^ Trailer {
-		PdfDictionary^ get() {
-			return gcnew PdfDictionary(_trailer);
-		}
+		PdfDictionary^ get();
 	}
 	property PdfDictionary^ Root {
-		PdfDictionary^ get() {
-			return gcnew PdfDictionary(pdf_dict_get(Context::Ptr, _trailer, PDF_NAME(Root)));
-		}
+		PdfDictionary^ get();
 	}
 	property PdfDocumentInfo^ Info {
-		PdfDocumentInfo^ get() {
-			return gcnew PdfDocumentInfo(pdf_dict_get(Context::Ptr, _trailer, PDF_NAME(Info)));
-		}
+		PdfDocumentInfo^ get();
 	}
 	property bool CanUndo {
 		bool get() { return pdf_can_undo(Context::Ptr, _pdf); }
@@ -98,6 +94,9 @@ public:
 	}
 	property bool CanBeSavedIncrementally {
 		bool get() { return pdf_can_be_saved_incrementally(Context::Ptr, _pdf); }
+	}
+	property bool IsLinearized {
+		bool get() { return pdf_doc_was_linearized(Context::Ptr, _pdf); }
 	}
 	property bool IsDisposed {
 		bool get() { return _document == NULL; }
@@ -112,9 +111,28 @@ public:
 	/// <param name="pageNumber">The page number (starts from 0).</param>
 	/// <returns>The loaded page.</returns>
 	Page^ LoadPage(int pageNumber);
-	int GetPageNumber(Page^ page) {
-		return pdf_lookup_page_number(Context::Ptr, _pdf, page->PagePtr);
-	}
+
+	/// <summary>
+	/// Gets page number from corresponding indirect reference.
+	/// </summary>
+	/// <param name="pageObj">The indirect reference.</param>
+	/// <returns>The corresponding page number (-1 if not found).</returns>
+	int LookupPageNumber(PdfObject^ pageObj);
+
+	/// <summary>
+	/// Gets only the <see cref="PdfDictionary"/> object without loading resources, annotations and other stuff.
+	/// </summary>
+	/// <param name="pageNumber">The page number (starts from 0).</param>
+	/// <returns>The page.</returns>
+	PdfDictionary^ GetPageDictionary(int pageNumber);
+
+	/// <summary>
+	/// Gets page bound without loading the page.
+	/// </summary>
+	/// <param name="pageNumber">The page number (starts from 0).</param>
+	/// <returns>The page rectangle (check if it is valid before use).</returns>
+	Box BoundPage(int pageNumber);
+
 	/// <summary>
 	/// Insert a page previously created by NewPage into the pages tree of the document.
 	/// </summary>
@@ -182,9 +200,13 @@ public:
 		pdf_delete_page_labels(Context::Ptr, _pdf, index);
 	}
 
-	MuPDF::PdfObject^ GetAssociatedFile(int index) {
-		return MuPDF::PdfObject::Wrap(pdf_document_associated_file(Context::Ptr, _pdf, index));
-	}
+	/// <summary>
+	/// Loads a name tree, flattening it into a single dictionary.
+	/// </summary>
+	/// <param name="name">The name tree to load, for instance <see cref="PdfNames.Dest"/>.</param>
+	PdfDictionary^ LoadNameTree(PdfNames name);
+
+	PdfObject^ GetAssociatedFile(int index);
 
 	void SyncOpenPages() {
 		pdf_sync_open_pages(Context::Ptr, _pdf);
@@ -192,24 +214,49 @@ public:
 	void Save(String^ filePath, WriterOptions^ options);
 	void SaveSnapshot(String^ filePath);
 	bool CheckPassword(String^ password);
+
 	void CloseFile() {
 		ReleaseHandle();
 	}
 	void Reopen();
 
-#pragma region Object creation
+#pragma region Object manipulation
 	PdfDictionary^ NewPage(Box mediaBox, int rotate, PdfDictionary^ resources, array<Byte>^ contents);
-	PdfDictionary^ NewDictionary(int capacity) {
-		return gcnew PdfDictionary(pdf_new_dict(Context::Ptr, _pdf, capacity));
+	PdfDictionary^ NewDictionary(int capacity);
+	PdfArray^ NewArray(int capacity);
+	PdfArray^ NewBox(Box box);
+	PdfArray^ NewMatrix(Matrix matrix);
+
+	/// <summary>
+	/// Returns true if 'obj' is an indirect reference to an object that is held by the "local" xref section.
+	/// </summary>
+	/// <param name="obj">The object to check.</param>
+	bool IsLocalObject(PdfObject^ obj) {
+		return pdf_is_local_object(Context::Ptr, _pdf, obj->Ptr);
 	}
-	PdfArray^ NewArray(int capacity) {
-		return gcnew PdfArray(pdf_new_array(Context::Ptr, _pdf, capacity));
+	/// <summary>
+	/// Allocates a slot in the xref table.
+	/// </summary>
+	/// <returns>Returns a fresh unused object number</returns>
+	int CreateObject() {
+		return pdf_create_object(Context::Ptr, _pdf);
 	}
-	PdfArray^ NewBox(Box box) {
-		return gcnew PdfArray(pdf_new_rect(Context::Ptr, _pdf, box));
+
+	void DeleteObject(int objNum);
+	void DeleteObject(PdfReference^ reference) {
+		DeleteObject(reference->Number);
 	}
-	PdfArray^ NewMatrix(Matrix matrix) {
-		return gcnew PdfArray(pdf_new_matrix(Context::Ptr, _pdf, matrix));
+
+	/// <summary>
+	/// Replace object in xref table with the passed in object.
+	/// </summary>
+	/// <param name="objNum">The number of the object to be replaced.</param>
+	/// <param name="obj">The new object to replace the slot.</param>
+	void UpdateObject(int objNum, PdfObject^ obj) {
+		pdf_update_object(Context::Ptr, _pdf, objNum, obj->Ptr);
+	}
+	bool HasObject(int objNum) {
+		return pdf_object_exists(Context::Ptr, _pdf, objNum);
 	}
 #pragma endregion
 
@@ -236,6 +283,11 @@ public:
 
 	Equatable(Document, _document)
 
+private:
+	void InitTrailer();
+
+	void ReleaseHandle();
+
 internal:
 	Document() {
 		auto d = pdf_create_document(Context::Ptr);
@@ -259,18 +311,6 @@ private:
 	pdf_obj* _trailer;
 	String^ _path;
 	int _pageCount;
-
-	void InitTrailer();
-
-	void ReleaseHandle() {
-		fz_context* ctx = Context::Ptr;
-		fz_drop_document(ctx, _document);
-		fz_drop_stream(ctx, _stream);
-		_document = NULL;
-		_pdf = NULL;
-		_trailer = NULL;
-		_stream = NULL;
-	}
 
 	void OpenStream(fz_stream* stream);
 
