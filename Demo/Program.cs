@@ -121,10 +121,10 @@ namespace Demo
 			// creates a pixmap the same size as the width and height of the page
 			using (Pixmap
 #if UNSAFE
-			pix = Pixmap.Create(ColorspaceKind.Rgb, width, height)
+			pix = Pixmap.Create(ColorspaceKind.RGB, width, height)
 #else
 			// use BGR color space to save byte conversions
-			pix = Pixmap.Create(ColorspaceKind.Bgr, width, height)
+			pix = Pixmap.Create(ColorspaceKind.BGR, width, height)
 #endif
 			) {
 				// sets white color as the background color of the pixmap
