@@ -76,7 +76,6 @@ def modify_libmupdf(root, ns):
 			# turn off fallback fonts
 			modified |= modify_preprocessor(preprocessors, "TOFU")
 			modified |= modify_preprocessor(preprocessors, "TOFU_CJK")
-			modified |= modify_preprocessor(preprocessors, "TOFU_BASE14")
 			modified |= modify_preprocessor(preprocessors, "TOFU_SIL")
 			modified |= modify_preprocessor(preprocessors, "TOFU_NOTO")
 			# turn off none-PDF features
