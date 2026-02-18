@@ -68,7 +68,7 @@ internal:
 private:
 	Colorspace() : Colorspace(NULL) {};
 	~Colorspace() {
-		fz_drop_colorspace(Context::Ptr, _colorspace);
+		DropHandle(_colorspace, fz_drop_colorspace);
 	}
 
 	fz_colorspace* _colorspace;

@@ -46,6 +46,16 @@
 
 #define EncodeUTF8(text, ptr) pin_ptr<unsigned char> ptr = &System::Text::Encoding::UTF8->GetBytes(text)[0];
 
-#define FreeHandle(gchandle) if(gchandle.IsAllocated) gchandle.Free();
+#define FreeGCHandle(gchandle) if(gchandle.IsAllocated) gchandle.Free();
+
+#define DropHandle(var, drop) if (var) {\
+	drop(Context::Ptr, var);\
+	var = NULL;\
+}
+
+#define DisposeObject(var) if (var) {\
+	delete var;\
+	var = nullptr;\
+}
 
 #endif // !__OBJWRAPPER

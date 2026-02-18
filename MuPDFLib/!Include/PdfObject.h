@@ -1,12 +1,11 @@
-#include "mupdf/fitz.h"
-#include "mupdf/pdf.h"
-#include "Collection.h"
-#include "Stream.h"
-
 #ifndef __PDFOBJECT
 #define __PDFOBJECT
 
 #pragma once
+#include "mupdf/fitz.h"
+#include "mupdf/pdf.h"
+#include "Collection.h"
+#include "Stream.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -20,6 +19,8 @@ struct pdf_obj {
 
 
 namespace MuPDF {
+
+ref class Stream;
 
 public enum class Kind {
 	Null,
@@ -180,13 +181,7 @@ private:
 	pdf_obj* _obj;
 	fz_context* _ctx;
 
-	void ReleaseHandle() {
-		if (_obj && _ctx) {
-			pdf_drop_obj(_ctx, _obj);
-			_obj = NULL;
-			_ctx = NULL;
-		}
-	}
+	void ReleaseHandle();
 };
 
 public ref class PdfNull : PdfObject {
@@ -326,10 +321,7 @@ public:
 		virtual int get() override { return pdf_dict_len(Context::Ptr, Ptr); }
 	}
 	property PdfName^ Type {
-		PdfName^ get() {
-			auto o = pdf_dict_get(Context::Ptr, Ptr, PDF_NAME(Type));
-			return pdf_is_name(Context::Ptr, o) ? gcnew PdfName(o) : nullptr;
-		}
+		PdfName^ get();
 	}
 	property Kind TypeKind {
 		virtual Kind get() override { return Kind::Dictionary; }
@@ -344,12 +336,7 @@ public:
 	bool ContainsKey(String^ key) {
 		return GetValue(key)->Ptr != nullptr;
 	}
-	PdfName^ GetKey(int index) {
-		if (index < 0 || index >= Count) {
-			throw gcnew IndexOutOfRangeException("Index is out of range of dictionary count.");
-		}
-		return gcnew PdfName(pdf_dict_get_key(Context::Ptr, Ptr, index));
-	}
+	PdfName^ GetKey(int index);
 	PdfObject^ GetValue(int index) {
 		return PdfObject::Wrap(pdf_dict_get_val(Context::Ptr, Ptr, index));
 	}
@@ -429,27 +416,13 @@ public:
 	void Set(PdfNames key, String^ value) {
 		pdf_dict_put_drop(Context::Ptr, Ptr, (pdf_obj*)key, NewPdfString(value));
 	}
-	void Set(PdfNames key, DateTime dateTime) {
-		pdf_dict_put_date(Context::Ptr, Ptr, (pdf_obj*)key, dateTime.ToUniversalTime().Subtract(DateTime(1970, 1, 1)).TotalSeconds);
-	}
-	void SetName(PdfNames key, String^ value) {
-		auto b = Encoding::UTF8->GetBytes(value);
-		pin_ptr<Byte> pb = &b[0];
-		pdf_dict_put_drop(Context::Ptr, Ptr, (pdf_obj*)key, pdf_new_name(Context::Ptr, (const char*)pb));
-	}
+	void Set(PdfNames key, DateTime dateTime);
+	void SetName(PdfNames key, String^ value);
 	void Sort() {
 		pdf_sort_dict(Context::Ptr, Ptr);
 	}
-	bool Remove(PdfNames key) {
-		int i = pdf_dict_len(Context::Ptr, Ptr);
-		pdf_dict_del(Context::Ptr, Ptr, (pdf_obj*)key);
-		return i != pdf_dict_len(Context::Ptr, Ptr);
-	}
-	bool Remove(PdfName^ key) {
-		int i = pdf_dict_len(Context::Ptr, Ptr);
-		pdf_dict_del(Context::Ptr, Ptr, key->Ptr);
-		return i != pdf_dict_len(Context::Ptr, Ptr);
-	}
+	bool Remove(PdfNames key);
+	bool Remove(PdfName^ key);
 	PdfDictionary^ Clone(bool deep) {
 		return gcnew PdfDictionary(deep ? pdf_deep_copy_obj(Context::Ptr, Ptr) : pdf_copy_dict(Context::Ptr, Ptr));
 	}
@@ -498,30 +471,10 @@ public:
 	property Kind TypeKind {
 		virtual Kind get() override { return Kind::Stream; }
 	}
-	Stream^ Open() {
-		return gcnew Stream(pdf_open_stream(Context::Ptr, Ptr));
-	}
-	Stream^ OpenRaw() {
-		return gcnew Stream(pdf_open_raw_stream(Context::Ptr, Ptr));
-	}
-	array<Byte>^ GetBytes() {
-		Stream^ s = Open();
-		try {
-			return s->ReadAll();
-		}
-		finally {
-			delete s;
-		}
-	}
-	array<Byte>^ GetRawBytes() {
-		Stream^ s = OpenRaw();
-		try {
-			return s->ReadAll();
-		}
-		finally {
-			delete s;
-		}
-	}
+	Stream^ Open();
+	Stream^ OpenRaw();
+	array<Byte>^ GetBytes();
+	array<Byte>^ GetRawBytes();
 
 	/// <summary>
 	/// Replaces bytes in the stream. The data must match /Filter, if <paramref name="compress"/> is true.
@@ -543,13 +496,7 @@ private:
 	fz_context* _ctx;
 	pdf_obj* _obj;
 
-	void ReleaseHandle() {
-		if (_obj && _ctx) {
-			pdf_drop_obj(_ctx, _obj);
-			_obj = NULL;
-			_ctx = NULL;
-		}
-	}
+	void ReleaseHandle();
 };
 
 public ref class PdfDocumentInfo : PdfDictionary {
@@ -605,11 +552,7 @@ public:
 	PdfObject^ GetObject(int index) {
 		return Wrap(pdf_array_get(Context::Ptr, Ptr, index), true);
 	}
-	PdfName^ GetName(int index) {
-		auto ctx = Context::Ptr;
-		auto obj = pdf_resolve_indirect_chain(ctx, pdf_array_get(ctx, Ptr, index));
-		return pdf_is_name(Context::Ptr, Ptr) ? gcnew PdfName(obj) : nullptr;
-	}
+	PdfName^ GetName(int index);
 	bool Contains(PdfObject^ obj) {
 		return pdf_array_contains(Context::Ptr, Ptr, obj->Ptr);
 	}

@@ -1,17 +1,25 @@
-#include "mupdf/fitz.h"
-#include "MuPDF.h"
-
 #ifndef __DOCUMENT
 #define __DOCUMENT
 
 #pragma once
+
+#include "mupdf/fitz.h"
+#include "MuPDF.h"
+
 using namespace System;
 using namespace System::Collections::Generic;
 
 namespace MuPDF {
 
+ref class PdfObject;
+ref class PdfArray;
+ref class PdfDictionary;
+ref class PdfReference;
+ref class PdfDocumentInfo;
 ref class WriterOptions;
 ref class Image;
+ref class Page;
+enum class PdfNames;
 enum class PageLabelStyle;
 
 public ref class Document sealed : IDisposable, IEquatable<Document^> {
@@ -139,49 +147,31 @@ public:
 	/// </summary>
 	/// <param name="page">The page to be inserted.</param>
 	/// <param name="beforePageNumber">The page number to insert at (pages numbered from 0). 0 <= n <= page_count inserts before page n. Negative numbers or INT_MAX are treated as page count, and insert at the end. 0 inserts at the start. All existing pages are after the insertion point are shuffled up.</param>
-	void InsertPage(Page^ page, int beforePageNumber) {
-		pdf_insert_page(Context::Ptr, _pdf, beforePageNumber, page->PagePtr);
-		RefreshPageCount();
-	}
-	void AppendPage(Page^ page) {
-		pdf_insert_page(Context::Ptr, _pdf, INT_MAX, page->PagePtr);
-		RefreshPageCount();
-	}
+	void InsertPage(Page^ page, int beforePageNumber);
+	void AppendPage(Page^ page);
 	/// <summary>
 	/// Removes specific page from document (page contents and resources are still preserved).
 	/// </summary>
 	/// <param name="pageNumber">The page number (starts from 0).</param>
-	void DeletePage(int pageNumber) {
-		pdf_delete_page(Context::Ptr, _pdf, pageNumber);
-		RefreshPageCount();
-	}
+	void DeletePage(int pageNumber);
 	/// <summary>
 	/// Removes specific pages [start, end) from document. This does not remove the page contents or resources from the file.
 	/// </summary>
 	/// <param name="start">The first page number to be removed (starts from 0).</param>
 	/// <param name="end">The last page number remained (starts from 0). If end is negative or greater than the number of pages in the document, it will be taken to be the end of the document.</param>
-	void DeletePage(int start, int end) {
-		pdf_delete_page_range(Context::Ptr, _pdf, start, end);
-		RefreshPageCount();
-	}
+	void DeletePage(int start, int end);
 	/// <summary>
 	/// Rearrange pages with the given order and numbers in <paramref name="pageNumbers"/>.
 	/// </summary>
 	/// <param name="pageNumbers">The page numbers of the rearranged document.</param>
-	void RearrangePages(array<int>^ pageNumbers) {
-		pin_ptr<int> n = &pageNumbers[0];
-		pdf_rearrange_pages(Context::Ptr, _pdf, pageNumbers->Length, n, pdf_clean_options_structure::PDF_CLEAN_STRUCTURE_DROP);
-	}
+	void RearrangePages(array<int>^ pageNumbers);
 	/// <summary>
 	/// Graft a page (and its resources) from the <paramref name="src"/> document to the destination document of the graft. This involves a deep copy of the objects in question.
 	/// </summary>
 	/// <param name="src">The source document to copy from.</param>
 	/// <param name="pageFrom">The source page number (pages numbered from 0, with -1 meaning "at the end").</param>
 	/// <param name="pageTo">The position within the destination document at which the page should be inserted (pages numbered from 0, with - 1 meaning "at the end").</param>
-	void GraftPageFrom(Document^ src, int pageFrom, int pageTo) {
-		pdf_graft_page(Context::Ptr, _pdf, pageTo, src->_pdf, pageFrom);
-		RefreshPageCount();
-	}
+	void GraftPageFrom(Document^ src, int pageFrom, int pageTo);
 	void GraftPagesFrom(Document^ src, int pageFrom, int numberOfPages, int pageTo);
 	void GraftPagesFrom(Document^ src, System::Collections::Generic::IEnumerable<int>^ srcPages, int pageTo);
 
@@ -217,7 +207,7 @@ public:
 	bool CheckPassword(String^ password);
 
 	void CloseFile() {
-		ReleaseHandle();
+		this->!Document();
 	}
 	void Reopen();
 
@@ -233,9 +223,7 @@ public:
 	/// Returns true if 'obj' is an indirect reference to an object that is held by the "local" xref section.
 	/// </summary>
 	/// <param name="obj">The object to check.</param>
-	bool IsLocalObject(PdfObject^ obj) {
-		return pdf_is_local_object(Context::Ptr, _pdf, obj->Ptr);
-	}
+	bool IsLocalObject(PdfObject^ obj);
 	/// <summary>
 	/// Allocates a slot in the xref table.
 	/// </summary>
@@ -245,18 +233,14 @@ public:
 	}
 
 	void DeleteObject(int objNum);
-	void DeleteObject(PdfReference^ reference) {
-		DeleteObject(reference->Number);
-	}
+	void DeleteObject(PdfReference^ reference);
 
 	/// <summary>
 	/// Replace object in xref table with the passed in object.
 	/// </summary>
 	/// <param name="objNum">The number of the object to be replaced.</param>
 	/// <param name="obj">The new object to replace the slot.</param>
-	void UpdateObject(int objNum, PdfObject^ obj) {
-		pdf_update_object(Context::Ptr, _pdf, objNum, obj->Ptr);
-	}
+	void UpdateObject(int objNum, PdfObject^ obj);
 	bool HasObject(int objNum) {
 		return pdf_object_exists(Context::Ptr, _pdf, objNum);
 	}
@@ -288,8 +272,6 @@ public:
 private:
 	void InitTrailer();
 
-	void ReleaseHandle();
-
 internal:
 	Document() {
 		auto d = pdf_create_document(Context::Ptr);
@@ -300,9 +282,7 @@ internal:
 		InitTrailer();
 	};
 	Document(fz_stream* stream);
-	~Document() {
-		ReleaseHandle();
-	}
+
 	property pdf_document* Ptr {
 		pdf_document* get() { return _pdf; }
 	}
@@ -313,6 +293,11 @@ private:
 	pdf_obj* _trailer;
 	String^ _path;
 	int _pageCount;
+
+	~Document() {
+		this->!Document();
+	}
+	!Document();
 
 	void OpenStream(fz_stream* stream);
 

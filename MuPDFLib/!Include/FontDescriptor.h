@@ -1,12 +1,15 @@
-#include "MuPDF.h"
-
 #ifndef __FONT_DESC
 #define __FONT_DESC
 #pragma once
 
+#include "MuPDF.h"
+
 using namespace System;
 
 namespace MuPDF {
+
+ref class PdfDictionary;
+ref class TextFont;
 
 [Flags]
 public enum class FontDescriptorFlags {
@@ -28,9 +31,7 @@ public:
 	FontDescriptor() : FontDescriptor(pdf_new_font_desc(Context::Ptr)) {
 	}
 	property TextFont^ Font {
-		TextFont^ get() {
-			return _textFont ? _textFont : (_textFont = gcnew TextFont(_font->font));
-		}
+		TextFont^ get();
 	}
 	property FontDescriptorFlags Flags {
 		FontDescriptorFlags get() { return (FontDescriptorFlags)_font->flags; }
@@ -71,17 +72,14 @@ internal:
 	FontDescriptor(pdf_font_desc* font) : _font(font) {
 		pdf_keep_font(Context::Ptr, font);
 	}
-	~FontDescriptor() {
-		ReleaseHandle();
-	}
+	~FontDescriptor();
 
 private:
 	pdf_font_desc* _font;
 	TextFont^ _textFont;
 
-	void ReleaseHandle() {
-		pdf_drop_font(Context::Ptr, _font);
-		_font = NULL;
+	!FontDescriptor() {
+		DropHandle(_font, pdf_drop_font);
 	}
 };
 

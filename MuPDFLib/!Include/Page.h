@@ -1,13 +1,19 @@
-#include "mupdf/fitz.h"
-#include "mupdf/pdf.h"
-#include "MuPDF.h"
-
 #ifndef __PAGE
 #define __PAGE
 
 #pragma once
+#include "mupdf/fitz.h"
+#include "mupdf/pdf.h"
+#include "MuPDF.h"
+
 using namespace System;
+
 namespace MuPDF {
+
+	ref class PdfObject;
+	ref class PdfArray;
+	ref class PdfDictionary;
+	ref class Device;
 
 public enum class PageBoxType {
 	Media,
@@ -67,44 +73,25 @@ public:
 	property RedactTextMethod Text;
 internal:
 	// implicitly convert PdfRedactOptions to pdf_redact_options
-	operator pdf_redact_options() {
-		pdf_redact_options opts;
-		opts.black_boxes = BlackBoxes;
-		opts.image_method = (int)ImageMethod;
-		opts.line_art = (int)LineArt;
-		opts.text = (int)Text;
-		return opts;
-	}
+	operator pdf_redact_options();
 };
-
 
 public ref class Page sealed : IDisposable, IEquatable<Page^> {
 public:
-	property int PageNumber {
-		// we don't use _pageNumber here, since pages can be reordered after editing operations
-		int get() { return pdf_lookup_page_number(Context::Ptr, _pdfPage->doc, _pdfPage->obj); }
-	}
+	property int PageNumber { int get(); }
 
 	/// <summary>
 	/// Determine the page size in points, taking page rotation into account. The page size is taken to be the crop box if it exists (visible area after cropping), otherwise the media box will be used (possibly including printing marks).
 	/// </summary>
-	property Box Bound {
-		Box get() { return pdf_bound_page(Context::Ptr, _pdfPage, FZ_CROP_BOX); }
-	}
-	property Box MediaBox {
-		Box get() { return pdf_dict_get_rect(Context::Ptr, _pdfPage->obj, (pdf_obj*)PdfNames::MediaBox); }
-	}
-	property Box CropBox {
-		Box get() { return pdf_dict_get_rect(Context::Ptr, _pdfPage->obj, (pdf_obj*)PdfNames::CropBox); }
-	}
-	property Box ArtBox {
-		Box get() { return pdf_dict_get_rect(Context::Ptr, _pdfPage->obj, (pdf_obj*)PdfNames::ArtBox); }
-	}
+	property Box Bound { Box get(); }
+	property Box MediaBox { Box get(); }
+	property Box CropBox { Box get(); }
+	property Box ArtBox { Box get(); }
 	property Box BleedBox {
-		Box get() { return pdf_dict_get_rect(Context::Ptr, _pdfPage->obj, (pdf_obj*)PdfNames::BleedBox); }
+		Box get();
 	}
 	property Box TrimBox {
-		Box get() { return pdf_dict_get_rect(Context::Ptr, _pdfPage->obj, (pdf_obj*)PdfNames::TrimBox); }
+		Box get();
 	}
 	property int Rotation {
 		int get() {
@@ -122,31 +109,15 @@ public:
 	property int AssociatedFileCount {
 		int get() { return pdf_count_page_associated_files(Context::Ptr, _pdfPage); }
 	}
-	property PdfDictionary^ PdfObject {
-		PdfDictionary^ get() {
-			return gcnew PdfDictionary(_pdfPage->obj);
-		}
-	}
-	property PdfDictionary^ Resources {
-		PdfDictionary^ get() {
-			auto r = pdf_page_resources(Context::Ptr, _pdfPage);
-			return r ? gcnew PdfDictionary(r) : nullptr;
-		}
-	}
+	property PdfDictionary^ PdfObject { PdfDictionary^ get(); }
+	property PdfDictionary^ Resources { PdfDictionary^ get(); }
 	/// <summary>
 	/// Gets the /Contents object, which can be a stream or an array, from the page dictionary
 	/// </summary>
 	property MuPDF::PdfObject^ Contents {
-		MuPDF::PdfObject^ get() {
-			auto c = pdf_page_contents(Context::Ptr, _pdfPage);
-			return c ? MuPDF::PdfObject::Wrap(c) : nullptr;
-		}
+		MuPDF::PdfObject^ get();
 	}
-	property MuPDF::TextPage^ TextPage {
-		MuPDF::TextPage^ get() {
-			return _textPage != nullptr ? _textPage : (_textPage = gcnew MuPDF::TextPage(fz_new_stext_page_from_page(Context::Ptr, _page, NULL)));
-		}
-	}
+	property MuPDF::TextPage^ TextPage { MuPDF::TextPage^ get(); }
 
 	Box BoundPageBox(PageBoxType boxType) {
 		return pdf_bound_page(Context::Ptr, _pdfPage, (fz_box_type)boxType);
@@ -155,14 +126,7 @@ public:
 		pdf_set_page_box(Context::Ptr, _pdfPage, (fz_box_type)boxType, box);
 	}
 	PdfArray^ GetPageBox(PageBoxType boxType);
-	array<Byte>^ GetContentBytes() {
-		auto c = pdf_page_contents(Context::Ptr, _pdfPage);
-		if (c) {
-			auto s = gcnew Stream(pdf_open_contents_stream(Context::Ptr, _pdfPage->doc, c));
-			return s->ReadAll();
-		}
-		return nullptr;
-	}
+	array<Byte>^ GetContentBytes();
 
 	/// <summary>
 	/// Clip contents, links and annotations within this page.
@@ -220,19 +184,12 @@ public:
 	void FlattenInheritablePageItems() {
 		pdf_flatten_inheritable_page_items(Context::Ptr, _pdfPage->obj);
 	}
-	MuPDF::PdfObject^ GetAssociatedFile(int index) {
-		return MuPDF::PdfObject::Wrap(pdf_page_associated_file(Context::Ptr, _pdfPage, index));
-	}
+	MuPDF::PdfObject^ GetAssociatedFile(int index);
 	void RefreshPageCache() {
 		pdf_sync_page(Context::Ptr, _pdfPage);
 		RefreshTextPage();
 	}
-	void RefreshTextPage() {
-		if (_textPage) {
-			delete _textPage;
-			_textPage = nullptr;
-		}
-	}
+	void RefreshTextPage();
 
 	Equatable(Page, _page)
 
@@ -243,7 +200,7 @@ internal:
 		pdf_flatten_inheritable_page_items(Context::Ptr, _pdfPage->obj);
 	};
 	~Page() {
-		ReleaseHandle();
+		this->!Page();
 	}
 	property pdf_page* Ptr {
 		pdf_page* get() { return _pdfPage; }
@@ -252,25 +209,14 @@ internal:
 		pdf_obj* get() { return _pdfPage->obj; }
 	}
 protected:
-	!Page() {
-		ReleaseHandle();
-	}
+	!Page();
+
 private:
 	fz_page* _page;
 	pdf_page* _pdfPage;
 	int _pageNumber;
 	MuPDF::TextPage^ _textPage;
 	array<Byte>^ _contents;
-
-	void ReleaseHandle() {
-		fz_drop_page(Context::Ptr, _page);
-		if (_textPage) {
-			delete _textPage;
-			_textPage = nullptr;
-		}
-		_page = NULL;
-		_pdfPage = NULL;
-	}
 };
 };
 

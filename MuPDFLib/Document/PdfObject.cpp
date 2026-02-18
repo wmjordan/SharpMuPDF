@@ -17,7 +17,7 @@ typedef enum pdf_objkind_e {
 #pragma endregion
 
 using namespace System;
-using namespace System::Runtime::InteropServices;
+using namespace Runtime::InteropServices;
 using namespace MuPDF;
 
 // hack: this method hacks into mupdf/pdf-object.c and provides direct type kind info of a PdfObject
@@ -77,6 +77,14 @@ PdfObject^ PdfObject::Wrap(pdf_obj* obj, bool resolve) {
 	throw gcnew MuException("Unexpected object kind: " + obj->kind.ToString());
 }
 
+void PdfObject::ReleaseHandle() {
+	if (_obj && _ctx) {
+		pdf_drop_obj(_ctx, _obj);
+		_obj = NULL;
+		_ctx = NULL;
+	}
+}
+
 bool PdfObject::Equals(PdfObject^ other) {
 	return other && pdf_objcmp(_ctx, Ptr, other->Ptr) == 0;
 }
@@ -102,13 +110,25 @@ MAKE_STRING:
 	return pdf_new_string(Ctx, (const char*)(void*)pb, b->Length);
 }
 
-PdfObject^ MuPDF::PdfDictionary::GetValue(String^ key) {
+PdfName^ PdfDictionary::Type::get() {
+	auto o = pdf_dict_get(Context::Ptr, Ptr, PDF_NAME(Type));
+	return pdf_is_name(Context::Ptr, o) ? gcnew PdfName(o) : nullptr;
+}
+
+PdfName^ PdfDictionary::GetKey(int index) {
+	if (index < 0 || index >= Count) {
+		throw gcnew IndexOutOfRangeException("Index is out of range of dictionary count.");
+	}
+	return gcnew PdfName(pdf_dict_get_key(Context::Ptr, Ptr, index));
+}
+
+PdfObject^ PdfDictionary::GetValue(String^ key) {
 	EncodeUTF8(key, p)
 	pdf_obj* v = pdf_dict_gets(Context::Ptr, Ptr, (const char*)p);
 	return Wrap(v);
 }
 
-PdfObject^ MuPDF::PdfDictionary::GetObject(String^ key) {
+PdfObject^ PdfDictionary::GetObject(String^ key) {
 	EncodeUTF8(key, p)
 	pdf_obj* v = pdf_dict_gets(Context::Ptr, Ptr, (const char*)p);
 	return Wrap(v, true);
@@ -135,6 +155,28 @@ PdfObject^ PdfDictionary::Locate(...array<PdfNames>^ names) {
 	return Wrap(pdf_dict_get(ctx, obj, (pdf_obj*)names[i]), true);
 RETURN_NULL:
 	return (PdfObject^)PdfNull::Instance;
+}
+
+void PdfDictionary::Set(PdfNames key, DateTime dateTime) {
+	pdf_dict_put_date(Context::Ptr, Ptr, (pdf_obj*)key, dateTime.ToUniversalTime().Subtract(DateTime(1970, 1, 1)).TotalSeconds);
+}
+
+void PdfDictionary::SetName(PdfNames key, String^ value) {
+	auto b = Encoding::UTF8->GetBytes(value);
+	pin_ptr<Byte> pb = &b[0];
+	pdf_dict_put_drop(Context::Ptr, Ptr, (pdf_obj*)key, pdf_new_name(Context::Ptr, (const char*)pb));
+}
+
+bool PdfDictionary::Remove(PdfNames key) {
+	int i = pdf_dict_len(Context::Ptr, Ptr);
+	pdf_dict_del(Context::Ptr, Ptr, (pdf_obj*)key);
+	return i != pdf_dict_len(Context::Ptr, Ptr);
+}
+
+bool MuPDF::PdfDictionary::Remove(PdfName^ key) {
+	int i = pdf_dict_len(Context::Ptr, Ptr);
+	pdf_dict_del(Context::Ptr, Ptr, key->Ptr);
+	return i != pdf_dict_len(Context::Ptr, Ptr);
 }
 
 array<Byte>^ PdfString::GetBytes() {
@@ -174,6 +216,34 @@ String^ PdfString::Value::get() {
 	return _string ? _string : (_string = DecodePdfString());
 }
 
+Stream^ PdfStream::Open() {
+	return gcnew Stream(pdf_open_stream(Context::Ptr, Ptr));
+}
+
+Stream^ PdfStream::OpenRaw() {
+	return gcnew Stream(pdf_open_raw_stream(Context::Ptr, Ptr));
+}
+
+array<Byte>^ PdfStream::GetBytes() {
+	Stream^ s = Open();
+	try {
+		return s->ReadAll();
+	}
+	finally {
+		delete s;
+	}
+}
+
+array<Byte>^ PdfStream::GetRawBytes() {
+	Stream^ s = OpenRaw();
+	try {
+		return s->ReadAll();
+	}
+	finally {
+		delete s;
+	}
+}
+
 void PdfStream::SetBytes(array<Byte>^ data, bool isCompressed) {
 	auto ctx = Ctx;
 	pin_ptr<Byte> d = &data[0];
@@ -182,7 +252,22 @@ void PdfStream::SetBytes(array<Byte>^ data, bool isCompressed) {
 	fz_free(ctx, b);
 }
 
-String^ MuPDF::PdfName::GetText() {
+void PdfStream::ReleaseHandle() {
+	if (_obj && _ctx) {
+		pdf_drop_obj(_ctx, _obj);
+		_obj = NULL;
+		_ctx = NULL;
+	}
+}
+
+String^ PdfName::GetText() {
 	auto b = pdf_to_name(Ctx, Ptr);
 	return DecodeUTF8(b);
 }
+
+PdfName^ PdfArray::GetName(int index) {
+	auto ctx = Context::Ptr;
+	auto obj = pdf_resolve_indirect_chain(ctx, pdf_array_get(ctx, Ptr, index));
+	return pdf_is_name(Context::Ptr, Ptr) ? gcnew PdfName(obj) : nullptr;
+}
+

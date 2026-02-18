@@ -1,11 +1,10 @@
-#include "mupdf/fitz.h"
-#include "mupdf/pdf.h"
-#include "MuPDF.h"
-
 #ifndef __STREAM
 #define __STREAM
 
 #pragma once
+#include "mupdf/fitz.h"
+#include "MuPDF.h"
+
 using namespace System;
 using namespace System::Runtime::InteropServices;
 

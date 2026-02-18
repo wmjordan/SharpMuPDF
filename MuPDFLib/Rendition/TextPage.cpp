@@ -1,6 +1,9 @@
 #include "TextPage.h"
 
-MuPDF::TextOptions::operator fz_stext_options(TextOptions^ options) {
+using namespace MuPDF;
+using namespace Runtime::InteropServices;
+
+TextOptions::operator fz_stext_options(TextOptions^ options) {
 	fz_stext_options s{};
 	if (options) {
 		s.flags = (int)options->Flags;
@@ -9,7 +12,7 @@ MuPDF::TextOptions::operator fz_stext_options(TextOptions^ options) {
 	return s;
 }
 
-String^ MuPDF::TextSpan::ToString() {
+String^ TextSpan::ToString() {
     int l = _length;
     auto sb = gcnew StringBuilder(l);
     fz_stext_char* c = _ch;
@@ -19,7 +22,7 @@ String^ MuPDF::TextSpan::ToString() {
     return sb->ToString();
 }
 
-String^ MuPDF::TextLine::ToString() {
+String^ TextLine::ToString() {
     auto sb = gcnew StringBuilder(16);
     fz_stext_char* c = _line->first_char;
     do {
@@ -28,7 +31,7 @@ String^ MuPDF::TextLine::ToString() {
     return sb->ToString();
 }
 
-String^ MuPDF::TextBlock::ToString() {
+String^ TextBlock::ToString() {
 	if (Type != BlockType::Text) {
 		return String::Empty;
 	}
@@ -86,7 +89,7 @@ bool MaybeUtf8(const char* text) {
     return b == 0;
 }
 
-bool MuPDF::TextLine::TextLineSpanContainer::MoveNext() {
+bool TextLine::TextLineSpanContainer::MoveNext() {
     if (!_start) {
         return false;
     }
@@ -112,8 +115,21 @@ bool MuPDF::TextLine::TextLineSpanContainer::MoveNext() {
     return true;
 }
 
-void MuPDF::TextLine::TextLineSpanContainer::Reset() {
+void TextLine::TextLineSpanContainer::Reset() {
     _Current = nullptr;
     _active = NULL;
     _start = _Line->_line->first_char;
+}
+
+array<Byte>^ TextFont::GetFontNameBytes() {
+    GcnewArray(Byte, b, 32);
+    auto n = _font->name;
+    Marshal::Copy((System::IntPtr)(void*)n, b, 0, 32);
+    return b;
+}
+
+array<short>^ TextFont::GetWidths() {
+    GcnewArray(short, a, _font->width_count);
+    Marshal::Copy((System::IntPtr)(void*)_font->width_table, a, 0, _font->width_count);
+    return a;
 }

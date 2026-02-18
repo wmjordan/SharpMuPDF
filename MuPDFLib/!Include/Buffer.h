@@ -1,10 +1,10 @@
-#include "../Context.h"
-#include <mupdf/fitz/buffer.h>
-
 #ifndef __BUFFER
 #define __BUFFER
 
 #pragma once
+#include "../Context.h"
+#include <mupdf/fitz/buffer.h>
+
 using namespace System;
 
 namespace MuPDF {

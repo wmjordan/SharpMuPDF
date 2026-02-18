@@ -1,41 +1,41 @@
-#include "../Context.h"
-#include "Stream.h"
-#include <mupdf/fitz/compressed-buffer.h>
-
 #ifndef __COMPRESSEDBUFFER
 #define __COMPRESSEDBUFFER
 
 #pragma once
+#include "../Context.h"
+#include <mupdf/fitz/compressed-buffer.h>
+
 using namespace System;
 
 namespace MuPDF {
 
-	public ref class CompressedBuffer sealed : IDisposable {
-	public:
-		CompressedBuffer() : CompressedBuffer(fz_new_compressed_buffer(Context::Ptr)) {};
+ref class Stream;
 
-		property bool IsDisposed { bool get() { return _buffer == NULL; } }
+public ref class CompressedBuffer sealed : IDisposable {
+public:
+	CompressedBuffer() : CompressedBuffer(fz_new_compressed_buffer(Context::Ptr)) {};
 
-		/// <summary>
-		/// Returns storage size used for this compressed buffer (in bytes).
-		/// </summary>
-		property long Size { long get() { return _buffer ? (long)fz_compressed_buffer_size(_buffer) : 0; } }
+	property bool IsDisposed { bool get() { return _buffer == NULL; } }
 
-		/// <summary>Open a stream to read decompressed data from this compressed buffer.</summary>
-		Stream^ Open() { return gcnew Stream(fz_open_compressed_buffer(Context::Ptr, _buffer)); }
+	/// <summary>
+	/// Returns storage size used for this compressed buffer (in bytes).
+	/// </summary>
+	property long Size { long get() { return _buffer ? (long)fz_compressed_buffer_size(_buffer) : 0; } }
 
-	internal:
-		CompressedBuffer(fz_compressed_buffer* buffer);
+	/// <summary>Open a stream to read decompressed data from this compressed buffer.</summary>
+	Stream^ Open();
 
-		~CompressedBuffer() {
-			ReleaseHandle();
-		}
+internal:
+	CompressedBuffer(fz_compressed_buffer* buffer);
 
-	private:
-		fz_compressed_buffer* _buffer;
+	~CompressedBuffer() {
+		this->!CompressedBuffer();
+	}
 
-		void ReleaseHandle();
-	};
+private:
+	fz_compressed_buffer* _buffer;
+	!CompressedBuffer();
+};
 
 }
 

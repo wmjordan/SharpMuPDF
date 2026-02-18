@@ -1,12 +1,11 @@
-#include "mupdf/fitz.h"
-#include "MuPDF.h"
-
 #ifndef __PIXMAP
 #define __PIXMAP
 
-using namespace System;
-
 #pragma once
+#include "mupdf/fitz.h"
+#include "MuPDF.h"
+
+using namespace System;
 
 namespace MuPDF {
 public ref class Pixmap sealed : IDisposable {
@@ -60,20 +59,8 @@ public:
 	void Tint(int color) {
 		Tint(0, color);
 	}
-	void Gamma(float gamma) {
-		if (gamma == 1.0) {
-			return;
-		}
-		fz_gamma_pixmap(Context::Ptr, _pixmap, gamma);
-	}
-	array<Byte>^ GetSampleBytes() {
-		if (_samples == IntPtr::Zero) {
-			return nullptr;
-		}
-		GcnewArray(Byte, d, _width * _height * _components);
-		System::Runtime::InteropServices::Marshal::Copy(_samples, d, 0, d->Length);
-		return d;
-	}
+	void Gamma(float gamma);
+	array<Byte>^ GetSampleBytes();
 internal:
 	Pixmap(fz_pixmap* pixmap) : _pixmap(pixmap) {
 		auto ctx = Context::Ptr;
@@ -84,7 +71,7 @@ internal:
 		_samples = (IntPtr)(void*)fz_pixmap_samples(ctx, pixmap);
 	};
 	~Pixmap() {
-		ReleaseHandle();
+		DropHandle(_pixmap, fz_drop_pixmap);
 	}
 	property fz_pixmap* Ptr {
 		fz_pixmap* get() { return _pixmap; }
@@ -94,9 +81,8 @@ private:
 	int _width, _height, _stride, _components;
 	IntPtr _samples;
 
-	void ReleaseHandle() {
-		fz_drop_pixmap(Context::Ptr, _pixmap);
-		_pixmap = NULL;
+	!Pixmap() {
+		DropHandle(_pixmap, fz_drop_pixmap);
 	}
 };
 

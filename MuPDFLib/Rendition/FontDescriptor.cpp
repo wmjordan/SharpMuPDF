@@ -9,7 +9,11 @@ DLLEXP pdf_font_desc* LoadFontDescriptor(fz_context* ctx, pdf_document* doc, pdf
 #pragma managed
 using namespace MuPDF;
 
-FontDescriptor^ MuPDF::FontDescriptor::Load(Document^ doc, PdfDictionary^ resources, PdfDictionary^ font) {
+TextFont^ FontDescriptor::Font::get() {
+	return _textFont ? _textFont : (_textFont = gcnew TextFont(_font->font));
+}
+
+FontDescriptor^ FontDescriptor::Load(Document^ doc, PdfDictionary^ resources, PdfDictionary^ font) {
 	pdf_resource_stack* res = new pdf_resource_stack();
 	res->resources = resources->Ptr;
 	auto fd = LoadFontDescriptor(Context::Ptr, doc->Ptr, res, font->Ptr);
@@ -18,4 +22,9 @@ FontDescriptor^ MuPDF::FontDescriptor::Load(Document^ doc, PdfDictionary^ resour
 		return gcnew FontDescriptor(fd);
 	}
 	throw MuException::FromContext();
+}
+
+FontDescriptor::~FontDescriptor() {
+	DisposeObject(_textFont);
+	this->!FontDescriptor();
 }

@@ -1,11 +1,10 @@
-#include "mupdf/fitz.h"
-#include "mupdf/pdf.h"
-#include "MuPDF.h"
-
 #ifndef __COOKIE
 #define __COOKIE
 
 #pragma once
+#include "mupdf/fitz.h"
+#include "MuPDF.h"
+
 namespace MuPDF {
 
 public ref class Cookie : IEquatable<Cookie^> {

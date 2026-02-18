@@ -1,15 +1,30 @@
-#include "mupdf/fitz.h"
-#include "MuPDF.h"
-
 #ifndef __TEXTPAGE
 #define __TEXTPAGE
+
+#pragma once
+#include "mupdf/fitz.h"
+#include "MuPDF.h"
 
 using namespace System;
 using namespace System::Collections;
 using namespace System::Text;
 
-#pragma once
 namespace MuPDF {
+
+[FlagsAttribute]
+public enum class CharacterFlags : UInt16 {
+	None,
+	Strikeout = 1, // FZ_STEXT_STRIKEOUT
+	Underline = 2,
+	Synthetic = 4,
+	Bold = 8, /* either real or 'fake' bold */
+	Filled = 16,
+	Stroked = 32,
+	Clipped = 64,
+	UnicodeIsCid = 128,
+	UnicodeIsGid = 256,
+	SyntheticLarge = 512,
+};
 
 [FlagsAttribute()]
 public enum class TextOption {
@@ -88,17 +103,8 @@ public:
 	property FontFlags Flags {
 		FontFlags get() { return (FontFlags)*(int*)&(_font->flags); }
 	}
-	array<Byte>^ GetFontNameBytes() {
-		GcnewArray(Byte, b, 32);
-		auto n = _font->name;
-		System::Runtime::InteropServices::Marshal::Copy((System::IntPtr)(void*)n, b, 0, 32);
-		return b;
-	}
-	array<short>^ GetWidths() {
-		GcnewArray(short, a, _font->width_count);
-		System::Runtime::InteropServices::Marshal::Copy((System::IntPtr)(void*)_font->width_table, a, 0, _font->width_count);
-		return a;
-	}
+	array<Byte>^ GetFontNameBytes();
+	array<short>^ GetWidths();
 	int GetCharacter(int cid) {
 		return ft_char_index(_font->ft_face, cid);
 	}
@@ -147,7 +153,7 @@ public:
 		float get() { return _ch->size; }
 	}
 	/// <summary>
-	/// Gets a pointer to the internal font, for font comparision without creating new TextFont instances.
+	/// Gets a pointer to the internal font, for font comparison without creating new TextFont instances.
 	/// </summary>
 	property IntPtr FontPtr {
 		IntPtr get() { return (IntPtr)(void*)_ch->font; }
@@ -164,6 +170,11 @@ public:
 	property TextFont^ Font {
 		TextFont^ get() { return _Font ? _Font : gcnew TextFont(_ch->font); }
 	}
+	/// <summary>
+	/// Gets rendering flags of a character
+	/// </summary>
+	property CharacterFlags Flags { CharacterFlags get() { return (CharacterFlags)*(uint16_t*)&(_ch->flags); } }
+
 	/// <summary>
 	/// Compares whether other TextChar has the same font as the current one.
 	/// </summary>
@@ -366,17 +377,15 @@ public:
 internal:
 	TextPage(fz_stext_page* page) : _page(page) {};
 	~TextPage() {
-		ReleaseHandle();
+		this->!TextPage();
 	}
 	property fz_stext_page* Ptr {
 		fz_stext_page* get() { return _page; }
 	}
 private:
 	fz_stext_page* _page;
-
-	void ReleaseHandle() {
-		fz_drop_stext_page(Context::Ptr, _page);
-		_page = NULL;
+	!TextPage() {
+		DropHandle(_page, fz_drop_stext_page);
 	}
 
 

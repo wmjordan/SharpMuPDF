@@ -1,9 +1,9 @@
-#include "mupdf/fitz.h"
-
 #ifndef __GEOMETRY
 #define __GEOMETRY
 
 #pragma once
+#include "mupdf/fitz.h"
+
 using namespace System;
 
 namespace MuPDF {

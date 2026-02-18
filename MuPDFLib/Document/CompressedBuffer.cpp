@@ -1,6 +1,9 @@
 #include "CompressedBuffer.h"
+#include "Stream.h"
 
 using namespace MuPDF;
+
+Stream^ CompressedBuffer::Open() { return gcnew Stream(fz_open_compressed_buffer(Context::Ptr, _buffer)); }
 
 CompressedBuffer::CompressedBuffer(fz_compressed_buffer* buffer) {
 	if (buffer) {
@@ -9,9 +12,6 @@ CompressedBuffer::CompressedBuffer(fz_compressed_buffer* buffer) {
 	}
 }
 
-void CompressedBuffer::ReleaseHandle() {
-	if (_buffer) {
-		fz_drop_compressed_buffer(Context::Ptr, _buffer);
-		_buffer = NULL;
-	}
+MuPDF::CompressedBuffer::!CompressedBuffer() {
+	DropHandle(_buffer, fz_drop_compressed_buffer);
 }

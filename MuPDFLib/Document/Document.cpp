@@ -164,6 +164,13 @@ Document::Document(fz_stream* stream) {
 	OpenStream(stream);
 }
 
+MuPDF::Document::!Document() {
+	DropHandle(_document, fz_drop_document);
+	DropHandle(_stream, fz_drop_stream);
+	_pdf = NULL;
+	_trailer = NULL;
+}
+
 void Document::OpenStream(fz_stream* stream) {
 	fz_context* ctx = Context::Ptr;
 	fz_document* doc = OpenDocumentWithStream(ctx, stream);
@@ -220,6 +227,31 @@ Box Document::BoundPage(int pageNumber) {
 	return ::BoundPage(Context::Ptr, _pdf, pageNumber);
 }
 
+void Document::InsertPage(Page^ page, int beforePageNumber) {
+	pdf_insert_page(Context::Ptr, _pdf, beforePageNumber, page->PagePtr);
+	RefreshPageCount();
+}
+
+void Document::AppendPage(Page^ page) {
+	pdf_insert_page(Context::Ptr, _pdf, INT_MAX, page->PagePtr);
+	RefreshPageCount();
+}
+
+void Document::DeletePage(int pageNumber) {
+	pdf_delete_page(Context::Ptr, _pdf, pageNumber);
+	RefreshPageCount();
+}
+
+void Document::DeletePage(int start, int end) {
+	pdf_delete_page_range(Context::Ptr, _pdf, start, end);
+	RefreshPageCount();
+}
+
+void Document::RearrangePages(array<int>^ pageNumbers) {
+	pin_ptr<int> n = &pageNumbers[0];
+	pdf_rearrange_pages(Context::Ptr, _pdf, pageNumbers->Length, n, pdf_clean_options_structure::PDF_CLEAN_STRUCTURE_DROP);
+}
+
 PdfDictionary^ Document::NewPage(Box mediaBox, int rotate, PdfDictionary^ resources, array<Byte>^ contents) {
 	pin_ptr<Byte> c = &contents[0];
 	auto b = fz_new_buffer_from_copied_data(Context::Ptr, c, contents->Length);
@@ -242,14 +274,31 @@ PdfArray^ Document::NewMatrix(Matrix matrix) {
 	return gcnew PdfArray(pdf_new_matrix(Context::Ptr, _pdf, matrix));
 }
 
-PdfObject^ MuPDF::Document::AddImage(Image^ image) {
+PdfObject^ Document::AddImage(Image^ image) {
 	return PdfObject::Wrap(pdf_add_image(Context::Ptr, _pdf, image->Ptr));
+}
+
+bool Document::IsLocalObject(PdfObject^ obj) {
+	return pdf_is_local_object(Context::Ptr, _pdf, obj->Ptr);
 }
 
 void Document::DeleteObject(int objNum) {
 	if (!::DeleteObject(Context::Ptr, _pdf, objNum)) {
 		throw MuException::FromContext();
 	}
+}
+
+void Document::DeleteObject(PdfReference^ reference) {
+	DeleteObject(reference->Number);
+}
+
+void Document::UpdateObject(int objNum, PdfObject^ obj) {
+	pdf_update_object(Context::Ptr, _pdf, objNum, obj->Ptr);
+}
+
+void Document::GraftPageFrom(Document^ src, int pageFrom, int pageTo) {
+	pdf_graft_page(Context::Ptr, _pdf, pageTo, src->_pdf, pageFrom);
+	RefreshPageCount();
 }
 
 void Document::GraftPagesFrom(Document^ srcDoc, int pageFrom, int numberOfPages, int pageTo) {
@@ -307,7 +356,7 @@ PdfDictionary^ Document::LoadNameTree(PdfNames name) {
 }
 
 PdfObject^ Document::GetAssociatedFile(int index) {
-	return MuPDF::PdfObject::Wrap(pdf_document_associated_file(Context::Ptr, _pdf, index));
+	return PdfObject::Wrap(pdf_document_associated_file(Context::Ptr, _pdf, index));
 }
 
 void Document::Save(String^ filePath, WriterOptions^ options) {
@@ -349,15 +398,6 @@ void Document::Reopen() {
 	}
 }
 
-void Document::ReleaseHandle() {
-	fz_context* ctx = Context::Ptr;
-	fz_drop_document(ctx, _document);
-	fz_drop_stream(ctx, _stream);
-	_document = NULL;
-	_pdf = NULL;
-	_trailer = NULL;
-	_stream = NULL;
-}
 
 pdf_write_options WriterOptions::ToNative() {
 	pdf_write_options r{};

@@ -58,11 +58,11 @@ void Pixmap::InvertLuminance() {
 	}
 }
 
-int MuPDF::Pixmap::LoadTiffSubImageCount(IntPtr data, int length) {
+int Pixmap::LoadTiffSubImageCount(IntPtr data, int length) {
 	return ::LoadTiffSubImageCount(Context::Ptr, (const unsigned char*)data.ToPointer(), (size_t)length);
 }
 
-Pixmap^ MuPDF::Pixmap::LoadTiffSubImage(IntPtr data, int length, int index) {
+Pixmap^ Pixmap::LoadTiffSubImage(IntPtr data, int length, int index) {
 	return gcnew Pixmap(::LoadTiffSubImage(Context::Ptr, (const unsigned char*)data.ToPointer(), (size_t)length, index));
 }
 
@@ -70,4 +70,20 @@ void Pixmap::Tint(int black, int white) {
 	if (!::TintPixmap(Context::Ptr, _pixmap, black, white)) {
 		throw MuException::FromContext();
 	}
+}
+
+void Pixmap::Gamma(float gamma) {
+	if (gamma == 1.0) {
+		return;
+	}
+	fz_gamma_pixmap(Context::Ptr, _pixmap, gamma);
+}
+
+array<Byte>^ Pixmap::GetSampleBytes() {
+	if (_samples == IntPtr::Zero) {
+		return nullptr;
+	}
+	GcnewArray(Byte, d, _width * _height * _components);
+	System::Runtime::InteropServices::Marshal::Copy(_samples, d, 0, d->Length);
+	return d;
 }
