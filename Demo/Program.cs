@@ -13,10 +13,11 @@ namespace Demo
 	{
 		static void Main (string[] args) {
 			HashSet<PdfObject> visited = new HashSet<PdfObject>(10);
+			var fileName = args.Length != 0 ? args[0] : "test.pdf";
 			using (var cookie = new Cookie())
 			using (var pageInfo = new StreamWriter("pages.txt", false)) { // Creates the context
 				try {
-					using (var doc = Document.Open("test.pdf")) {
+					using (var doc = Document.Open(fileName)) {
 						Console.WriteLine("Page count: " + doc.PageCount);
 						Console.WriteLine("Object count: " + doc.ObjectCount);
 
