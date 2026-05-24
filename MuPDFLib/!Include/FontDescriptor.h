@@ -66,6 +66,7 @@ public:
 	int CidToGid(int cid) {
 		return pdf_font_cid_to_gid(Context::Ptr, _font, cid);
 	}
+	String^ DecodeText(array<unsigned char>^ bytes, int offset, int length);
 	static FontDescriptor^ Load(Document^ doc, PdfDictionary^ resources, PdfDictionary^ font);
 
 internal:
