@@ -1,40 +1,52 @@
+#include "MuPDF.h"
 #include "ResourceStack.h"
 
 using namespace MuPDF;
 
-ResourceStack::ResourceStack(PdfDictionary^ resource) {
-	_ptr->resources = resource->Ptr;
-	_stack->Push(resource);
+void ResourceStack::Push(PdfDictionary^ resources) {
+	if (resources == nullptr)
+		throw gcnew ArgumentNullException("resources");
+
+	pdf_obj* obj = resources->Ptr;
+	if (obj == nullptr)
+		throw gcnew InvalidOperationException("Resources object is null.");
+
+	pdf_keep_obj(Context::Ptr, obj);
+
+	pdf_resource_stack* node = fz_malloc_struct(Context::Ptr, pdf_resource_stack);
+	node->resources = obj;
+	node->next = _head;
+	_head = node;
+	_count++;
 }
 
 PdfDictionary^ ResourceStack::Pop() {
-	if (_stack->Count) {
-		auto next = _ptr->next;
-		fz_free(Context::Ptr, _ptr);
-		_ptr = next;
-		return _stack->Pop();
+	if (_head == nullptr)
+		throw gcnew InvalidOperationException("Resource stack is empty.");
+
+	pdf_resource_stack* node = _head;
+	_head = _head->next;
+	_count--;
+
+	PdfDictionary^ result = gcnew PdfDictionary(node->resources);
+
+	pdf_drop_obj(Context::Ptr, node->resources);
+	fz_free(Context::Ptr, node);
+
+	return result;
+}
+
+void ResourceStack::Clear() {
+	while (_head != nullptr) {
+		pdf_resource_stack* node = _head;
+		_head = _head->next;
+		pdf_drop_obj(Context::Ptr, node->resources);
+		fz_free(Context::Ptr, node);
 	}
-	return nullptr;
+	_count = 0;
 }
 
-void ResourceStack::Push(PdfDictionary^ res) {
-	_stack->Push(res);
-	auto p = _ptr;
-	_ptr = fz_malloc_struct(Context::Ptr, pdf_resource_stack);
-	_ptr->resources = res->Ptr;
-	_ptr->next = p;
+ResourceStack::~ResourceStack() {
+	Clear();
 }
 
-PdfObject^ ResourceStack::LookupResource(PdfNames type, String^ name) {
-	EncodeUTF8(name, n);
-	return PdfObject::Wrap(pdf_lookup_resource(Context::Ptr, _ptr, (pdf_obj*)type, (const char*)n));
-}
-
-ResourceStack::!ResourceStack() {
-	while (_ptr) {
-		pdf_resource_stack* stk = _ptr;
-		_ptr = stk->next;
-		fz_free(Context::Ptr, stk);
-	}
-	_ptr = NULL;
-}
