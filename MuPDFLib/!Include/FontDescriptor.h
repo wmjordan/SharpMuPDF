@@ -66,8 +66,9 @@ public:
 	int CidToGid(int cid) {
 		return pdf_font_cid_to_gid(Context::Ptr, _font, cid);
 	}
-	String^ DecodeText(array<unsigned char>^ bytes, int offset, int length);
+	void DecodeText(array<unsigned char>^ bytes, int offset, int length, StringBuilder^ sb);
 	static FontDescriptor^ Load(Document^ doc, PdfDictionary^ resources, PdfDictionary^ font);
+	static FontDescriptor^ Load(Document^ doc, ResourceStack^ resources, PdfDictionary^ font);
 
 internal:
 	FontDescriptor(pdf_font_desc* font) : _font(font) {
@@ -78,6 +79,8 @@ internal:
 private:
 	pdf_font_desc* _font;
 	TextFont^ _textFont;
+
+	void DecodeRawBytes(unsigned char* data, unsigned char* end, StringBuilder^ sb);
 
 	!FontDescriptor() {
 		DropHandle(_font, pdf_drop_font);
