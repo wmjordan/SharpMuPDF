@@ -274,6 +274,26 @@ PdfArray^ Document::NewMatrix(Matrix matrix) {
 	return gcnew PdfArray(pdf_new_matrix(Context::Ptr, _pdf, matrix));
 }
 
+PdfReference^ MuPDF::Document::NewReference(int num, int gen) {
+	return gcnew PdfReference(pdf_new_indirect(Context::Ptr, _pdf, num, gen));
+}
+
+PdfInteger^ MuPDF::Document::NewNumber(int value) {
+	return gcnew PdfInteger(value);
+}
+
+PdfFloat^ MuPDF::Document::NewNumber(float value) {
+	return gcnew PdfFloat(value);
+}
+
+PdfName^ MuPDF::Document::NewName(String^ value) {
+	return gcnew PdfName(value);
+}
+
+PdfString^ MuPDF::Document::NewString(String^ value) {
+	return gcnew PdfString(value);
+}
+
 PdfObject^ Document::AddImage(Image^ image) {
 	return PdfObject::Wrap(pdf_add_image(Context::Ptr, _pdf, image->Ptr));
 }

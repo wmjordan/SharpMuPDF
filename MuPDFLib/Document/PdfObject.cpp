@@ -89,27 +89,6 @@ bool PdfObject::Equals(PdfObject^ other) {
 	return other && pdf_objcmp(_ctx, Ptr, other->Ptr) == 0;
 }
 
-pdf_obj* PdfContainer::NewPdfString(String^ text) {
-	array<unsigned char>^ b;
-	pin_ptr<unsigned char> pb;
-	for each (auto ch in text) {
-		if (ch > 127) {
-			int l = (text->Length + 1) << 1;
-			b = gcnew array<unsigned char>(l);
-			b[0] = 0xFF;
-			b[1] = 0xFE;
-			pin_ptr<const wchar_t> ps = PtrToStringChars(text);
-			pb = &b[2];
-			memcpy(pb, ps, l - 2);
-			goto MAKE_STRING;
-		}
-	}
-	b = AsciiEncoding->GetBytes(text);
-MAKE_STRING:
-	pb = &b[0];
-	return pdf_new_string(Ctx, (const char*)(void*)pb, b->Length);
-}
-
 PdfName^ PdfDictionary::Type::get() {
 	auto o = pdf_dict_get(Context::Ptr, Ptr, PDF_NAME(Type));
 	return pdf_is_name(Context::Ptr, o) ? gcnew PdfName(o) : nullptr;
@@ -164,19 +143,53 @@ void PdfDictionary::Set(PdfNames key, DateTime dateTime) {
 void PdfDictionary::SetName(PdfNames key, String^ value) {
 	auto b = Encoding::UTF8->GetBytes(value);
 	pin_ptr<Byte> pb = &b[0];
-	pdf_dict_put_drop(Context::Ptr, Ptr, (pdf_obj*)key, pdf_new_name(Context::Ptr, (const char*)pb));
+	auto ctx = Context::Ptr;
+	pdf_dict_put_drop(ctx, Ptr, (pdf_obj*)key, pdf_new_name(ctx, (const char*)pb));
 }
 
 bool PdfDictionary::Remove(PdfNames key) {
-	int i = pdf_dict_len(Context::Ptr, Ptr);
-	pdf_dict_del(Context::Ptr, Ptr, (pdf_obj*)key);
-	return i != pdf_dict_len(Context::Ptr, Ptr);
+	auto ctx = Context::Ptr;
+	int i = pdf_dict_len(ctx, Ptr);
+	pdf_dict_del(ctx, Ptr, (pdf_obj*)key);
+	return i != pdf_dict_len(ctx, Ptr);
 }
 
 bool MuPDF::PdfDictionary::Remove(PdfName^ key) {
-	int i = pdf_dict_len(Context::Ptr, Ptr);
-	pdf_dict_del(Context::Ptr, Ptr, key->Ptr);
-	return i != pdf_dict_len(Context::Ptr, Ptr);
+	auto ctx = Context::Ptr;
+	int i = pdf_dict_len(ctx, Ptr);
+	pdf_dict_del(ctx, Ptr, key->Ptr);
+	return i != pdf_dict_len(ctx, Ptr);
+}
+
+bool MuPDF::PdfDictionary::Remove(String^ key) {
+	auto b = Encoding::UTF8->GetBytes(key);
+	pin_ptr<Byte> pb = &b[0];
+	auto ctx = Context::Ptr;
+	int i = pdf_dict_len(ctx, Ptr);
+	pdf_dict_del(ctx, Ptr, pdf_new_name(ctx, (const char*)pb));
+	return i != pdf_dict_len(ctx, Ptr);
+}
+
+pdf_obj* PdfString::New(String^ text) {
+	array<unsigned char>^ b;
+	pin_ptr<unsigned char> pb;
+	for each(auto ch in text) {
+		if (ch > 127) {
+			// has Unicode character
+			int l = (text->Length + 1) << 1;
+			b = gcnew array<unsigned char>(l);
+			b[0] = 0xFF;
+			b[1] = 0xFE;
+			pin_ptr<const wchar_t> ps = PtrToStringChars(text);
+			pb = &b[2];
+			memcpy(pb, ps, l - 2);
+			goto MAKE_STRING;
+		}
+	}
+	b = AsciiEncoding->GetBytes(text);
+MAKE_STRING:
+	pb = &b[0];
+	return pdf_new_string(Context::Ptr, (const char*)(void*)pb, b->Length);
 }
 
 array<Byte>^ PdfString::GetBytes() {
@@ -258,6 +271,12 @@ void PdfStream::ReleaseHandle() {
 		_obj = NULL;
 		_ctx = NULL;
 	}
+}
+
+pdf_obj* MuPDF::PdfName::New(String^ text) {
+	array<unsigned char>^ b = Encoding::UTF8->GetBytes(text);
+	pin_ptr<unsigned char> pb = &b[0];
+	return pdf_new_name(Context::Ptr, (const char*)(void*)pb);
 }
 
 String^ PdfName::GetText() {

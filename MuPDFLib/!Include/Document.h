@@ -213,10 +213,19 @@ public:
 
 #pragma region Object manipulation
 	PdfDictionary^ NewPage(Box mediaBox, int rotate, PdfDictionary^ resources, array<Byte>^ contents);
+	PdfDictionary^ NewPage(Box mediaBox, array<Byte>^ contents) { return NewPage(mediaBox, 0, nullptr, contents); }
 	PdfDictionary^ NewDictionary(int capacity);
+	PdfDictionary^ NewDictionary() { return NewDictionary(0); }
 	PdfArray^ NewArray(int capacity);
+	PdfArray^ NewArray() { return NewArray(0); }
 	PdfArray^ NewBox(Box box);
 	PdfArray^ NewMatrix(Matrix matrix);
+	PdfReference^ NewReference(int num, int gen);
+	PdfReference^ NewReference(int num) { return NewReference(num, 0); }
+	PdfInteger^ NewNumber(int value);
+	PdfFloat^ NewNumber(float value);
+	PdfName^ NewName(String^ value);
+	PdfString^ NewString(String^ value);
 	PdfObject^ AddImage(Image^ image);
 
 	/// <summary>

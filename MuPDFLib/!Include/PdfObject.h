@@ -41,8 +41,8 @@ public enum class Kind {
 /// </summary>
 public ref class PdfObject : IDisposable, IEquatable<PdfObject^> {
 public:
-	const int MaxObjectNumber = PDF_MAX_OBJECT_NUMBER;
-	const int MaxGenerationNumber = PDF_MAX_GEN_NUMBER;
+	literal int MaxObjectNumber = PDF_MAX_OBJECT_NUMBER;
+	literal int MaxGenerationNumber = PDF_MAX_GEN_NUMBER;
 	/// <summary>
 	/// Gets or sets whether this object is dirty (modified).
 	/// </summary>
@@ -105,8 +105,8 @@ public:
 	property int IntegerValue {
 		int get() { return pdf_to_int(_ctx, _obj); }
 	}
-	property int LongValue {
-		int get() { return pdf_to_int64(_ctx, _obj); }
+	property long LongValue {
+		long get() { return pdf_to_int64(_ctx, _obj); }
 	}
 	property float FloatValue {
 		float get() { return pdf_to_real(_ctx, _obj); }
@@ -127,7 +127,7 @@ public:
 	int ToInt32Default(int defaultValue) {
 		return pdf_to_int_default(Context::Ptr, _obj, defaultValue);
 	}
-	int ToSingleDefault(float defaultValue) {
+	float ToSingleDefault(float defaultValue) {
 		return pdf_to_real_default(Context::Ptr, _obj, defaultValue);
 	}
 	PdfObject^ DeepClone(bool deep) {
@@ -138,7 +138,8 @@ public:
 		return Object::ReferenceEquals(x, y) || x && y && pdf_objcmp(x->_ctx, x->Ptr, y->Ptr) == 0;
 	}
 	static bool operator != (PdfObject^ x, PdfObject^ y) {
-		return !Object::ReferenceEquals(x, y) && x && y && pdf_objcmp(x->_ctx, x->Ptr, y->Ptr) != 0;
+		return !Object::ReferenceEquals(x, y)
+			&& !(x && y && pdf_objcmp(x->_ctx, x->Ptr, y->Ptr) == 0);
 	}
 	virtual bool Equals(PdfObject^ other);
 	virtual bool Equals(Object^ obj) override {
@@ -189,7 +190,7 @@ public:
 	property Kind TypeKind {
 		virtual Kind get() override { return Kind::Null; }
 	}
-	static const PdfNull^ Instance = gcnew PdfNull();
+	static initonly PdfNull^ Instance = gcnew PdfNull();
 	virtual String^ ToString() override { return "<null>"; }
 	~PdfNull() {}
 internal:
@@ -201,8 +202,8 @@ public:
 	property Kind TypeKind {
 		virtual Kind get() override { return Kind::Boolean; }
 	}
-	static const PdfBoolean^ True = gcnew PdfBoolean(true);
-	static const PdfBoolean^ False = gcnew PdfBoolean(false);
+	static initonly PdfBoolean^ True = gcnew PdfBoolean(true);
+	static initonly PdfBoolean^ False = gcnew PdfBoolean(false);
 	property bool Value {
 		bool get() { return Ptr == PDF_TRUE; }
 	}
@@ -222,6 +223,7 @@ public enum class PdfNames {
 
 public ref class PdfName : PdfObject {
 public:
+	PdfName(String^ name) : PdfObject(New(name)) {};
 	property Kind TypeKind {
 		virtual Kind get() override { return Kind::Name; }
 	}
@@ -243,6 +245,7 @@ public:
 	virtual String^ ToString() override { return "/" + Name; }
 internal:
 	PdfName(pdf_obj* obj) : PdfObject(obj) {};
+	static pdf_obj* New(String^ text);
 	String^ GetText();
 private:
 	String^ _name;
@@ -250,6 +253,7 @@ private:
 
 public ref class PdfInteger : PdfObject {
 public:
+	PdfInteger(int value) : PdfObject(pdf_new_int(Context::Ptr, value)) {};
 	property Kind TypeKind {
 		virtual Kind get() override { return Kind::Integer; }
 	}
@@ -268,6 +272,7 @@ internal:
 
 public ref class PdfFloat : PdfObject {
 public:
+	PdfFloat(float value) : PdfFloat(pdf_new_real(Context::Ptr, value)) {};
 	property Kind TypeKind {
 		virtual Kind get() override { return Kind::Float; }
 	}
@@ -281,6 +286,7 @@ internal:
 
 public ref class PdfString : PdfObject {
 public:
+	PdfString(String^ text) : PdfObject(New(text)) {};
 	property Kind TypeKind {
 		virtual Kind get() override { return Kind::String; }
 	}
@@ -297,7 +303,9 @@ public:
 	virtual String^ ToString() override { return Value; }
 internal:
 	PdfString(pdf_obj* obj) : PdfObject(obj) {};
+	static pdf_obj* New(String^ text);
 private:
+	static Encoding^ AsciiEncoding = Encoding::ASCII;
 	String^ _string;
 	String^ DecodePdfString();
 };
@@ -308,11 +316,9 @@ public:
 		virtual int get() abstract;
 	}
 protected:
-	pdf_obj* NewPdfString(String^ text);
 	PdfContainer(pdf_obj* obj) : PdfObject(obj) {};
 	PdfContainer(pdf_obj* obj, bool keep) : PdfObject(obj, keep) {};
 private:
-	static Encoding^ AsciiEncoding = Encoding::ASCII;
 };
 
 public ref class PdfDictionary : PdfContainer, System::Collections::Generic::IEnumerable<KeyValuePair<PdfName^, PdfObject^>>, IIndexableCollection<KeyValuePair<PdfName^, PdfObject^>> {
@@ -414,7 +420,7 @@ public:
 		pdf_dict_put_real(Context::Ptr, Ptr, (pdf_obj*)key, value);
 	}
 	void Set(PdfNames key, String^ value) {
-		pdf_dict_put_drop(Context::Ptr, Ptr, (pdf_obj*)key, NewPdfString(value));
+		pdf_dict_put_drop(Context::Ptr, Ptr, (pdf_obj*)key, PdfString::New(value));
 	}
 	void Set(PdfNames key, DateTime dateTime);
 	void SetName(PdfNames key, String^ value);
@@ -423,6 +429,7 @@ public:
 	}
 	bool Remove(PdfNames key);
 	bool Remove(PdfName^ key);
+	bool Remove(String^ key);
 	PdfDictionary^ Clone(bool deep) {
 		return gcnew PdfDictionary(deep ? pdf_deep_copy_obj(Context::Ptr, Ptr) : pdf_copy_dict(Context::Ptr, Ptr));
 	}
@@ -577,7 +584,7 @@ public:
 		pdf_array_push_drop(Context::Ptr, Ptr, (pdf_obj*)value);
 	}
 	void Append(String^ value) {
-		pdf_array_push_drop(Context::Ptr, Ptr, NewPdfString(value));
+		pdf_array_push_drop(Context::Ptr, Ptr, PdfString::New(value));
 	}
 	void Append(PdfObject^ value) {
 		pdf_array_push_drop(Context::Ptr, Ptr, value->Ptr);
@@ -595,7 +602,7 @@ public:
 		pdf_array_put(Context::Ptr, Ptr, index, (pdf_obj*)value);
 	}
 	void Set(int index, String^ value) {
-		pdf_array_put_drop(Context::Ptr, Ptr, index, NewPdfString(value));
+		pdf_array_put_drop(Context::Ptr, Ptr, index, PdfString::New(value));
 	}
 	void Set(int index, PdfObject^ value) {
 		pdf_array_put_drop(Context::Ptr, Ptr, index, value->Ptr);
