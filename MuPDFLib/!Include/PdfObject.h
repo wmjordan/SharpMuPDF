@@ -2,8 +2,8 @@
 #define __PDFOBJECT
 
 #pragma once
-#include "mupdf/fitz.h"
-#include "mupdf/pdf.h"
+#include "fitz.h"
+#include "pdf.h"
 #include "Collection.h"
 #include "Stream.h"
 

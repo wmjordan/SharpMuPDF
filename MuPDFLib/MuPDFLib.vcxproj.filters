@@ -69,9 +69,7 @@
     <ClCompile Include="Document\Buffer.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="Document\ResourceStack.cpp">
-      <Filter>Document</Filter>
-    </ClCompile>
+    <ClCompile Include="Document\ResourceStack.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="!Include\MuException.h">
@@ -134,8 +132,12 @@
     <ClInclude Include="!Include\Buffer.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="!Include\ResourceStack.h">
-      <Filter>Document</Filter>
+    <ClInclude Include="!Include\ResourceStack.h" />
+    <ClInclude Include="!Include\Pdf.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="!Include\Fitz.h">
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

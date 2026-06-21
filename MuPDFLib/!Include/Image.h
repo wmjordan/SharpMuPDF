@@ -4,7 +4,6 @@
 #include "CompressedBuffer.h"
 #include "Geometry.h"
 #include "Pixmap.h"
-#include <mupdf/fitz/image.h>
 
 #ifndef __IMAGE
 #define __IMAGE

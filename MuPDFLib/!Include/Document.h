@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "mupdf/fitz.h"
+#include "fitz.h"
 #include "MuPDF.h"
 
 using namespace System;
@@ -15,6 +15,10 @@ ref class PdfObject;
 ref class PdfArray;
 ref class PdfDictionary;
 ref class PdfReference;
+ref class PdfInteger;
+ref class PdfFloat;
+ref class PdfName;
+ref class PdfString;
 ref class PdfDocumentInfo;
 ref class WriterOptions;
 ref class Image;
@@ -146,7 +150,7 @@ public:
 	/// Insert a page previously created by NewPage into the pages tree of the document.
 	/// </summary>
 	/// <param name="page">The page to be inserted.</param>
-	/// <param name="beforePageNumber">The page number to insert at (pages numbered from 0). 0 <= n <= page_count inserts before page n. Negative numbers or INT_MAX are treated as page count, and insert at the end. 0 inserts at the start. All existing pages are after the insertion point are shuffled up.</param>
+	/// <param name="beforePageNumber">The page number to insert at (pages numbered from 0). n between 0 to page_count inserts before page n. Negative numbers or INT_MAX are treated as page count, and insert at the end. 0 inserts at the start. All existing pages are after the insertion point are shuffled up.</param>
 	void InsertPage(Page^ page, int beforePageNumber);
 	void AppendPage(Page^ page);
 	/// <summary>
@@ -194,7 +198,7 @@ public:
 	/// <summary>
 	/// Loads a name tree, flattening it into a single dictionary.
 	/// </summary>
-	/// <param name="name">The name tree to load, for instance <see cref="PdfNames.Dest"/>.</param>
+	/// <param name="name">The name tree to load, for instance <c>PdfNames.Dest</c>.</param>
 	PdfDictionary^ LoadNameTree(PdfNames name);
 
 	PdfObject^ GetAssociatedFile(int index);
@@ -363,29 +367,17 @@ public enum class PageLabelStyle
 
 public ref class WriterOptions sealed {
 public:
-	/// <summary>
-	/// Write just the changed objects.
-	/// </summary>
+	/// <summary>Write just the changed objects.</summary>
 	bool Incremental;
-	/// <summary>
-	/// Pretty-print dictionaries and arrays.
-	/// </summary>
+	/// <summary>Pretty-print dictionaries and arrays.</summary>
 	bool Pretty;
-	/// <summary>
-	/// ASCII hex encode binary streams.
-	/// </summary>
+	/// <summary>ASCII hex encode binary streams.</summary>
 	bool Ascii;
-	/// <summary>
-	/// Compress streams.
-	/// </summary>
+	/// <summary>Compress streams.</summary>
 	CompressionMode CompressionMode;
-	/// <summary>
-	/// Compress (or leave compressed) image streams.
-	/// </summary>
+	/// <summary>Compress (or leave compressed) image streams.</summary>
 	bool CompressImages;
-	/// <summary>
-	/// Compress (or leave compressed) font streams.
-	/// </summary>
+	/// <summary>Compress (or leave compressed) font streams.</summary>
 	bool CompressFonts;
 	/// <summary>
 	/// Decompress streams (except when compressing images/fonts).
@@ -395,11 +387,26 @@ public:
 	/// Garbage collect objects before saving.
 	/// </summary>
 	GarbageCollectionMode Garbage;
+	/// <summary>
+	/// Write linearised.
+	/// </summary>
 	bool Linear;
+	/// <summary>
+	/// Clean content streams.
+	/// </summary>
 	bool Clean;
+	/// <summary>
+	/// Sanitize content streams.
+	/// </summary>
 	bool Sanitize;
+	/// <summary>
+	/// (Re)create appearance streams.
+	/// </summary>
 	bool Appearance;
 	EncryptionMode Encrypt;
+	/// <summary>
+	/// Don't regenerate ID if set (used for clean).
+	/// </summary>
 	bool DoNotRegenerateId;
 	/// <summary>
 	/// Document encryption permissions.
@@ -407,8 +414,17 @@ public:
 	Permissions Permissions;
 	array<Byte>^ OwnerPassword;
 	array<Byte>^ UserPassword;
+	/// <summary>
+	/// Do not use directly. Use the snapshot functions.
+	/// </summary>
 	bool Snapshot;
+	/// <summary>
+	/// When cleaning, preserve metadata unchanged.
+	/// </summary>
 	bool PreserveMetadata;
+	/// <summary>
+	/// Compress xref table.
+	/// </summary>
 	bool UseObjectStreams;
 	/// <summary>
 	/// 0: Default, 1: min, 100: max

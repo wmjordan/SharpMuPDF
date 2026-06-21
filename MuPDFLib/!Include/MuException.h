@@ -1,4 +1,3 @@
-#include "mupdf/fitz.h"
 #include "../Context.h"
 
 #ifndef __MUEXCEPTION

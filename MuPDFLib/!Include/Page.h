@@ -2,8 +2,8 @@
 #define __PAGE
 
 #pragma once
-#include "mupdf/fitz.h"
-#include "mupdf/pdf.h"
+#include "Fitz.h"
+#include "Pdf.h"
 #include "MuPDF.h"
 
 using namespace System;

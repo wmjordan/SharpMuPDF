@@ -14,6 +14,7 @@
 #include "Document.h"
 #include "Stream.h"
 #include "Image.h"
+#include "ResourceStack.h"
 #include "FontDescriptor.h"
 
 #ifndef DLLEXP

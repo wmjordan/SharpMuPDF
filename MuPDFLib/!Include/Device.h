@@ -1,7 +1,7 @@
 #ifndef __DEVICE
 #define __DEVICE
 #pragma once
-#include "mupdf/fitz.h"
+#include "fitz.h"
 #include "MuPDF.h"
 
 using namespace System;

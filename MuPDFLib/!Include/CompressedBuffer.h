@@ -3,7 +3,6 @@
 
 #pragma once
 #include "../Context.h"
-#include <mupdf/fitz/compressed-buffer.h>
 
 using namespace System;
 

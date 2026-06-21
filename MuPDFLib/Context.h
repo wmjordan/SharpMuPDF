@@ -1,4 +1,4 @@
-#include "mupdf/fitz.h"
+#include "fitz.h"
 
 using namespace System;
 using namespace System::Runtime::InteropServices;

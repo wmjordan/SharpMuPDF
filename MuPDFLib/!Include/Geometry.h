@@ -2,7 +2,7 @@
 #define __GEOMETRY
 
 #pragma once
-#include "mupdf/fitz.h"
+#include "fitz.h"
 
 using namespace System;
 

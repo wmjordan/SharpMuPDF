@@ -5,6 +5,7 @@
 #include "MuPDF.h"
 
 using namespace System;
+using namespace System::Text;
 
 namespace MuPDF {
 
