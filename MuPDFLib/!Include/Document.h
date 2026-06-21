@@ -44,14 +44,14 @@ public:
 	property int ObjectCount {
 		int get() { return pdf_count_objects(Context::Ptr, _pdf); }
 	}
-	property long FileSize {
-		long get() { return _pdf->file_size; }
+	property long long FileSize {
+		long long get() { return _pdf->file_size; }
 	}
-	property long StartXref {
-		long get() { return _pdf->startxref; }
+	property long long StartXref {
+		long long get() { return _pdf->startxref; }
 	}
-	property long XrefBase {
-		long get() { return _pdf->xref_base; }
+	property int XrefBase {
+		int get() { return _pdf->xref_base; }
 	}
 	property int AssociatedFileCount {
 		int get() { return pdf_count_document_associated_files(Context::Ptr, _pdf); }
@@ -434,6 +434,19 @@ public:
 	/// Add labels to each object showing how it can be reached from the Root.
 	/// </summary>
 	bool AddLabels;
+
+	/// <summary>
+	/// Returns a setting that compress fonts, images and content streams, garbage collecting unused objects.
+	/// </summary>
+	/// <returns></returns>
+	static WriterOptions^ GetNormalMode() {
+		auto o = gcnew WriterOptions();
+		o->CompressFonts = true;
+		o->CompressImages = true;
+		o->CompressionMode = CompressionMode::ZLib;
+		o->Garbage = GarbageCollectionMode::CollectGarbage;
+		return o;
+	}
 internal:
 	pdf_write_options ToNative();
 };

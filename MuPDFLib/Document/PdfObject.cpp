@@ -137,7 +137,7 @@ RETURN_NULL:
 }
 
 void PdfDictionary::Set(PdfNames key, DateTime dateTime) {
-	pdf_dict_put_date(Context::Ptr, Ptr, (pdf_obj*)key, dateTime.ToUniversalTime().Subtract(DateTime(1970, 1, 1)).TotalSeconds);
+	pdf_dict_put_date(Context::Ptr, Ptr, (pdf_obj*)key, static_cast<int64_t>(dateTime.ToUniversalTime().Subtract(DateTime(1970, 1, 1)).TotalSeconds));
 }
 
 void PdfDictionary::SetName(PdfNames key, String^ value) {

@@ -105,8 +105,8 @@ public:
 	property int IntegerValue {
 		int get() { return pdf_to_int(_ctx, _obj); }
 	}
-	property long LongValue {
-		long get() { return pdf_to_int64(_ctx, _obj); }
+	property long long LongValue {
+		long long get() { return pdf_to_int64(_ctx, _obj); }
 	}
 	property float FloatValue {
 		float get() { return pdf_to_real(_ctx, _obj); }
@@ -261,9 +261,9 @@ public:
 		int get() { return pdf_to_int(Context::Ptr, Ptr); }
 		void set(int value) { pdf_set_int(Context::Ptr, Ptr, value); }
 	}
-	property long LongValue {
-		long get() { return pdf_to_int64(Context::Ptr, Ptr); }
-		void set(long value) { pdf_set_int(Context::Ptr, Ptr, value); }
+	property long long LongValue {
+		long long get() { return pdf_to_int64(Context::Ptr, Ptr); }
+		void set(long long value) { pdf_set_int(Context::Ptr, Ptr, value); }
 	}
 	virtual String^ ToString() override { return LongValue.ToString(); }
 internal:

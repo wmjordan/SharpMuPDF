@@ -19,7 +19,7 @@ public:
 	/// <summary>
 	/// Returns storage size used for this compressed buffer (in bytes).
 	/// </summary>
-	property long Size { long get() { return _buffer ? (long)fz_compressed_buffer_size(_buffer) : 0; } }
+	property long long Size { long long get() { return _buffer ? (long)fz_compressed_buffer_size(_buffer) : 0; } }
 
 	/// <summary>Open a stream to read decompressed data from this compressed buffer.</summary>
 	Stream^ Open();
