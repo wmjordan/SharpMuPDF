@@ -63,7 +63,7 @@ PdfObject^ PdfObject::Wrap(pdf_obj* obj, bool resolve) {
 	case PDF_STRING: return gcnew PdfString(obj);
 	case PDF_NAME: return gcnew PdfName(obj);
 	case PDF_ARRAY: return gcnew PdfArray(obj);
-	case PDF_DICT: return gcnew PdfDictionary(obj);
+	case PDF_DICT: return pdf_is_stream(Context::Ptr, obj) ? gcnew PdfStream(obj) : gcnew PdfDictionary(obj);
 	case PDF_INDIRECT:
 		if (resolve) {
 			if (pdf_is_stream(Context::Ptr, obj)) {
@@ -263,14 +263,6 @@ void PdfStream::SetBytes(array<Byte>^ data, bool isCompressed) {
 	fz_buffer* b = fz_new_buffer_from_copied_data(ctx, d, data->Length);
 	pdf_update_stream(ctx, pdf_pin_document(ctx, Ptr), Ptr, b, isCompressed);
 	fz_free(ctx, b);
-}
-
-void PdfStream::ReleaseHandle() {
-	if (_obj && _ctx) {
-		pdf_drop_obj(_ctx, _obj);
-		_obj = NULL;
-		_ctx = NULL;
-	}
 }
 
 pdf_obj* MuPDF::PdfName::New(String^ text) {

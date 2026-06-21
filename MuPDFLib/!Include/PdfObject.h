@@ -489,21 +489,10 @@ public:
 	/// <param name="data">The data to be placed into the stream.</param>
 	/// <param name="compress">Whether the data is compressed. If not compressed, /Filter and /DecodeParms will be removed.</param>
 	void SetBytes(array<Byte>^ data, bool compress);
-	~PdfStream() {
-		ReleaseHandle();
-	}
-	!PdfStream() {
-		ReleaseHandle();
-	}
 internal:
-	PdfStream(pdf_obj* obj) : PdfDictionary(pdf_resolve_indirect_chain(Context::Ptr, obj)), _obj(obj) {
-		pdf_keep_obj(_ctx = Context::Ptr, obj);
+	PdfStream(pdf_obj* obj) : PdfDictionary(obj) {
+		pdf_keep_obj(Context::Ptr, obj);
 	};
-private:
-	fz_context* _ctx;
-	pdf_obj* _obj;
-
-	void ReleaseHandle();
 };
 
 public ref class PdfDocumentInfo : PdfDictionary {
