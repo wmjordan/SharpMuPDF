@@ -92,6 +92,10 @@ EXPORTS
 	fz_append_string
 	fz_append_byte
 	fz_append_rune
+	fz_append_uint32_le
+	fz_append_uint16_le
+	fz_append_uint32_be
+	fz_append_uint16_be
 	fz_append_int32_le
 	fz_append_int16_le
 	fz_append_int32_be
@@ -189,8 +193,6 @@ EXPORTS
 	fz_log_error_printf
 	fz_vlog_error_printf
 	fz_log_error
-	fz_start_throw_on_repair
-	fz_end_throw_on_repair
 	fz_report_error
 	fz_ignore_error
 	fz_convert_error
@@ -207,6 +209,7 @@ EXPORTS
 	fz_warning_callback
 	fz_tune_image_decode
 	fz_tune_image_scale
+	fz_tune_image_rendering
 	fz_aa_level
 	fz_set_aa_level
 	fz_text_aa_level
@@ -222,6 +225,8 @@ EXPORTS
 	fz_set_use_document_css
 	fz_enable_icc
 	fz_disable_icc
+	fz_malloc_array_imp
+	fz_realloc_array_imp
 	fz_malloc
 	fz_calloc
 	fz_realloc
@@ -304,6 +309,7 @@ EXPORTS
 	fz_begin_metatext
 	fz_end_metatext
 	fz_new_device_of_size
+	fz_new_passthrough_device_of_size
 	fz_close_device
 	fz_drop_device
 	fz_keep_device
@@ -313,12 +319,16 @@ EXPORTS
 	fz_new_trace_device
 	fz_new_xmltext_device
 	fz_new_bbox_device
+	fz_new_culling_device
+	fz_new_culling_device_with_rects
 	fz_new_draw_device
 	fz_new_draw_device_with_bbox
 	fz_new_draw_device_with_proof
 	fz_new_draw_device_with_bbox_proof
 	fz_new_draw_device_type3
+	fz_init_draw_options
 	fz_parse_draw_options
+	fz_apply_draw_options
 	fz_new_draw_device_with_options
 	fz_new_display_list
 	fz_new_list_device
@@ -353,6 +363,7 @@ EXPORTS
 	fz_load_outline
 	fz_new_outline_iterator
 	fz_is_document_reflowable
+	fz_style_document
 	fz_layout_document
 	fz_make_bookmark
 	fz_lookup_bookmark
@@ -507,6 +518,7 @@ EXPORTS
 	fz_rect_from_irect
 	fz_expand_rect
 	fz_expand_irect
+	fz_rect_area
 	fz_include_point_in_rect
 	fz_translate_rect
 	fz_translate_irect
@@ -532,6 +544,29 @@ EXPORTS
 	fz_is_irect_inside_irect
 	fz_is_quad_inside_quad
 	fz_is_quad_intersecting_quad
+	fz_ckd_mul_i32
+	fz_ckd_add_i32
+	fz_ckd_sub_i32
+	fz_ckd_mul_u32
+	fz_ckd_add_u32
+	fz_ckd_sub_u32
+	fz_ckd_mul_int
+	fz_ckd_add_int
+	fz_ckd_sub_int
+	fz_ckd_mul_uint
+	fz_ckd_add_uint
+	fz_ckd_sub_uint
+	fz_ckd_mul_size
+	fz_ckd_add_size
+	fz_ckd_sub_size
+	fz_ckd_mul_i64
+	fz_ckd_add_i64
+	fz_ckd_sub_i64
+	fz_ckd_mul_u64
+	fz_ckd_add_u64
+	fz_ckd_sub_u64
+	fz_ckd_size_from_i64
+	fz_ckd_int_from_i64
 	fz_getopt_long
 	fz_getopt
 	fz_opt_from_list
@@ -570,6 +605,7 @@ EXPORTS
 	fz_drop_image
 	fz_keep_image_store_key
 	fz_drop_image_store_key
+	fz_image_digest
 	fz_new_image_of_size
 	fz_new_image_from_compressed_buffer
 	fz_new_image_from_pixmap
@@ -635,6 +671,23 @@ EXPORTS
 	fz_log
 	fz_log_module
 	fz_new_log_for_module
+	fz_new_options
+	fz_parse_options
+	fz_keep_options
+	fz_drop_options
+	fz_lookup_option
+	fz_lookup_option_yes
+	fz_lookup_option_boolean
+	fz_lookup_option_float
+	fz_lookup_option_integer
+	fz_lookup_option_unsigned
+	fz_lookup_option_enum
+	fz_validate_options
+	fz_warn_on_unused_options
+	fz_throw_on_unused_options
+	fz_count_options
+	fz_get_option_by_index
+	fz_access_option_by_index
 	fz_outline_iterator_item
 	fz_outline_iterator_next
 	fz_outline_iterator_prev
@@ -786,6 +839,7 @@ EXPORTS
 	fz_new_pool
 	fz_pool_alloc
 	fz_pool_strdup
+	fz_pool_strndup
 	fz_pool_size
 	fz_drop_pool
 	fz_new_pool_array_imp
@@ -863,6 +917,7 @@ EXPORTS
 	fz_read_all
 	fz_read_file
 	fz_try_read_file
+	fz_read_text_file
 	fz_read_uint16
 	fz_read_uint24
 	fz_read_uint32
@@ -941,6 +996,8 @@ EXPORTS
 	fz_print_stext_header_as_xhtml
 	fz_print_stext_trailer_as_xhtml
 	fz_print_stext_page_as_xml
+	fz_print_stext_page_as_xml_with_flags
+	fz_debug_stext_page
 	fz_print_stext_page_as_json
 	fz_print_stext_page_as_text
 	fz_search_stext_page
@@ -949,7 +1006,9 @@ EXPORTS
 	fz_snap_selection
 	fz_copy_selection
 	fz_copy_rectangle
+	fz_init_stext_options
 	fz_parse_stext_options
+	fz_apply_stext_options
 	fz_segment_stext_page
 	fz_segment_stext_rect
 	fz_paragraph_break
@@ -962,9 +1021,10 @@ EXPORTS
 	fz_is_unicode_space_equivalent
 	fz_is_unicode_whitespace
 	fz_is_unicode_hyphen
+	fz_init_search_options
 	fz_parse_search_options
+	fz_apply_search_options
 	fz_new_search
-	fz_search_set_options
 	fz_search_forwards
 	fz_search_backwards
 	fz_feed_search
@@ -973,12 +1033,20 @@ EXPORTS
 	fz_match_stext_page_cb
 	fz_new_stext_struct
 	fz_stext_page_block_iterator_begin
+	fz_stext_page_block_iterator_begin_from
+	fz_stext_page_block_iterator_begin_dfs
+	fz_stext_page_block_iterator_begin_from_dfs
+	fz_stext_page_block_iterator_begin_rdfs
+	fz_stext_page_block_iterator_begin_from_rdfs
 	fz_stext_page_block_iterator_next
 	fz_stext_page_block_iterator_down
 	fz_stext_page_block_iterator_up
 	fz_stext_page_block_iterator_next_dfs
+	fz_stext_page_block_iterator_next_rdfs
 	fz_stext_page_block_iterator_eod
 	fz_stext_page_block_iterator_eod_dfs
+	fz_stext_page_block_iterator_eod_rdfs
+	fz_verify_stext_page
 	fz_fopen_utf8
 	fz_remove_utf8
 	fz_free_argv
@@ -1051,12 +1119,25 @@ EXPORTS
 	fz_append_pixmap_as_data_uri
 	fz_new_xhtml_document_from_document
 	fz_new_buffer_from_page_with_format
+	fz_new_pixmap_from_page_number_culling_text
+	fz_new_pixmap_from_page_culling_text
+	fz_new_pixmap_from_display_list_culling_text
+	fz_new_pixmap_from_culled_page_number
+	fz_new_pixmap_from_culled_page
+	fz_new_pixmap_from_culled_display_list
+	fz_new_pixmap_from_page_number_culling_text_etc
+	fz_new_pixmap_from_page_culling_text_etc
+	fz_new_pixmap_from_display_list_culling_text_etc
 
+	fz_init_pclm_options
 	fz_parse_pclm_options
+	fz_apply_pclm_options
 	fz_new_pclm_band_writer
 	fz_write_pixmap_as_pclm
 	fz_save_pixmap_as_pclm
+	fz_init_pdfocr_options
 	fz_parse_pdfocr_options
+	fz_apply_pdfocr_options
 	fz_new_pdfocr_band_writer
 	fz_pdfocr_band_writer_set_progress
 	fz_write_pixmap_as_pdfocr
@@ -1108,9 +1189,6 @@ EXPORTS
 	fz_save_pixmap_as_psd
 	fz_write_pixmap_as_psd
 	fz_new_psd_band_writer
-	fz_has_option
-	fz_option_eq
-	fz_copy_option
 	fz_new_document_writer
 	fz_new_pdf_writer
 	fz_new_pdf_writer_with_output
@@ -1264,6 +1342,8 @@ EXPORTS
 	pdf_annot_has_open
 	pdf_annot_has_popup
 	pdf_annot_has_author
+	pdf_annot_has_subject
+	pdf_annot_has_in_reply_to
 	pdf_annot_has_rich_contents
 	pdf_annot_has_rich_defaults
 	pdf_annot_flags
@@ -1342,8 +1422,12 @@ EXPORTS
 	pdf_set_annot_vertex
 	pdf_annot_contents
 	pdf_set_annot_contents
+	pdf_annot_name
+	pdf_set_annot_name
 	pdf_annot_author
 	pdf_set_annot_author
+	pdf_annot_subject
+	pdf_set_annot_subject
 	pdf_annot_modification_date
 	pdf_set_annot_modification_date
 	pdf_annot_creation_date
@@ -1511,6 +1595,8 @@ EXPORTS
 	pdf_document_language
 	pdf_set_document_language
 	pdf_parse_write_options
+	pdf_init_write_options
+	pdf_apply_write_options
 	pdf_has_unsaved_sigs
 	pdf_write_document
 	pdf_save_document
@@ -1532,6 +1618,10 @@ EXPORTS
 	pdf_load_object_labels
 	pdf_drop_object_labels
 	pdf_label_object
+	pdf_check_structure_tree
+	pdf_start_throw_on_repair
+	pdf_end_throw_on_repair
+	pdf_maybe_throw_after_repair
 	pdf_access_exec_menu_item_event
 	pdf_load_encoding
 	pdf_set_font_wmode
@@ -1604,7 +1694,9 @@ EXPORTS
 	pdf_tos_save
 	pdf_tos_restore
 	pdf_tos_get_text
+	pdf_tos_get_clip_text
 	pdf_tos_reset
+	pdf_tos_accumulate_clip
 	pdf_tos_make_trm
 	pdf_tos_move_after_char
 	pdf_tos_translate
@@ -1640,6 +1732,7 @@ EXPORTS
 	pdf_keep_obj
 	pdf_drop_obj
 	pdf_drop_singleton_obj
+	pdf_obj_is_singleton
 	pdf_is_null
 	pdf_is_bool
 	pdf_is_int
@@ -1650,6 +1743,7 @@ EXPORTS
 	pdf_is_array
 	pdf_is_dict
 	pdf_is_indirect
+	pdf_ensure_indirect
 	pdf_obj_num_is_stream
 	pdf_is_stream
 	pdf_objcmp
@@ -1903,10 +1997,13 @@ EXPORTS
 	pdf_empty_store
 	pdf_purge_locals_from_store
 	pdf_purge_object_from_store
+	pdf_pattern_uses_blending
 	pdf_find_font_resource
 	pdf_insert_font_resource
 	pdf_find_colorspace_resource
 	pdf_insert_colorspace_resource
+	pdf_find_image_resource
+	pdf_insert_image_resource
 	pdf_drop_resource_tables
 	pdf_purge_local_resources
 	pdf_eval_function
@@ -1971,6 +2068,7 @@ EXPORTS
 	pdf_load_image_stream
 	pdf_version
 	pdf_trailer
+	pdf_set_trailer
 	pdf_set_populating_xref_trailer
 	pdf_xref_len
 	pdf_metadata

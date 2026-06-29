@@ -9,7 +9,7 @@ import pathlib
 
 MAJOR = "2"
 MAJOR_REV = "1"
-MINOR = "27"
+MINOR = "28"
 MINOR_REV = "0"
 
 def rewriteRevision(m):

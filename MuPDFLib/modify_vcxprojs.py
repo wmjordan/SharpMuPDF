@@ -85,6 +85,7 @@ def modify_libmupdf(root, ns):
 			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_HTML", "1")
 			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_JS", "0")
 			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_MOBI", "0")
+			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_MD", "0")
 			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_OFFICE", "0")
 			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_OCR_OUTPUT", "0")
 			modified |= modify_preprocessor(preprocessors, "FZ_ENABLE_ODT_OUTPUT", "0")
