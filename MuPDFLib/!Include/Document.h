@@ -118,16 +118,12 @@ public:
 	static MuPDF::Document^ Open(String^ filePath);
 	static MuPDF::Document^ Open(array<Byte>^ memoryFile);
 
-	/// <summary>
-	/// Loads specific page from document.
-	/// </summary>
+	/// <summary>Loads specific page from document.</summary>
 	/// <param name="pageNumber">The page number (starts from 0).</param>
 	/// <returns>The loaded page.</returns>
 	Page^ LoadPage(int pageNumber);
 
-	/// <summary>
-	/// Gets page number from corresponding indirect reference.
-	/// </summary>
+	/// <summary>Gets page number from corresponding indirect reference.</summary>
 	/// <param name="pageObj">The indirect reference.</param>
 	/// <returns>The corresponding page number (-1 if not found).</returns>
 	int LookupPageNumber(PdfObject^ pageObj);
@@ -179,17 +175,13 @@ public:
 	void GraftPagesFrom(Document^ src, int pageFrom, int numberOfPages, int pageTo);
 	void GraftPagesFrom(Document^ src, System::Collections::Generic::IEnumerable<int>^ srcPages, int pageTo);
 
-	/// <summary>
-	/// Sets page label from page <paramref name="index"/>.
-	/// </summary>
+	/// <summary>Sets page label from page <paramref name="index"/>.</summary>
 	/// <param name="index">The page index (numbered from 0).</param>
 	/// <param name="style">The label style.</param>
 	/// <param name="prefix">The prefix of the page label.</param>
 	/// <param name="start">The start number of the label.</param>
 	void SetPageLabel(int index, PageLabelStyle style, String^ prefix, int start);
-	/// <summary>
-	/// Deletes page label from page <paramref name="index"/>.
-	/// </summary>
+	/// <summary>Deletes page label from page <paramref name="index"/>.</summary>
 	/// <param name="index">The page index (numbered from 0).</param>
 	void DeletePageLabel(int index) {
 		pdf_delete_page_labels(Context::Ptr, _pdf, index);
@@ -200,6 +192,12 @@ public:
 	/// </summary>
 	/// <param name="name">The name tree to load, for instance <c>PdfNames.Dest</c>.</param>
 	PdfDictionary^ LoadNameTree(PdfNames name);
+
+	bool IsImage(PdfReference^ pdfRef);
+	/// <summary>Loads the image from a PDF indirect reference. Returns null if <paramref name="imgRef"/> is not an image.</summary>
+	Image^ LoadImage(PdfReference^ imgRef);
+
+	bool IsFileSpecification(PdfReference^ pdfRef);
 
 	PdfObject^ GetAssociatedFile(int index);
 
@@ -379,66 +377,37 @@ public:
 	bool CompressImages;
 	/// <summary>Compress (or leave compressed) font streams.</summary>
 	bool CompressFonts;
-	/// <summary>
-	/// Decompress streams (except when compressing images/fonts).
-	/// </summary>
+	/// <summary>Decompress streams (except when compressing images/fonts).</summary>
 	bool Decompress;
-	/// <summary>
-	/// Garbage collect objects before saving.
-	/// </summary>
+	/// <summary>Garbage collect objects before saving.</summary>
 	GarbageCollectionMode Garbage;
-	/// <summary>
-	/// Write linearised.
-	/// </summary>
+	/// <summary>Write linearised.</summary>
 	bool Linear;
-	/// <summary>
-	/// Clean content streams.
-	/// </summary>
+	/// <summary>Clean content streams.</summary>
 	bool Clean;
-	/// <summary>
-	/// Sanitize content streams.
-	/// </summary>
+	/// <summary>Sanitize content streams.</summary>
 	bool Sanitize;
-	/// <summary>
-	/// (Re)create appearance streams.
-	/// </summary>
+	/// <summary>(Re)create appearance streams.</summary>
 	bool Appearance;
 	EncryptionMode Encrypt;
-	/// <summary>
-	/// Don't regenerate ID if set (used for clean).
-	/// </summary>
+	/// <summary>Don't regenerate ID if set (used for clean).</summary>
 	bool DoNotRegenerateId;
-	/// <summary>
-	/// Document encryption permissions.
-	/// </summary>
+	/// <summary>Document encryption permissions.</summary>
 	Permissions Permissions;
 	array<Byte>^ OwnerPassword;
 	array<Byte>^ UserPassword;
-	/// <summary>
-	/// Do not use directly. Use the snapshot functions.
-	/// </summary>
+	/// <summary>Do not use directly. Use the snapshot functions.</summary>
 	bool Snapshot;
-	/// <summary>
-	/// When cleaning, preserve metadata unchanged.
-	/// </summary>
+	/// <summary>When cleaning, preserve metadata unchanged.</summary>
 	bool PreserveMetadata;
-	/// <summary>
-	/// Compress xref table.
-	/// </summary>
+	/// <summary>Compress xref table.</summary>
 	bool UseObjectStreams;
-	/// <summary>
-	/// 0: Default, 1: min, 100: max
-	/// </summary>
+	/// <summary>0: Default, 1: min, 100: max</summary>
 	int CompressionEffort;
-	/// <summary>
-	/// Add labels to each object showing how it can be reached from the Root.
-	/// </summary>
+	/// <summary>Add labels to each object showing how it can be reached from the Root.</summary>
 	bool AddLabels;
 
-	/// <summary>
-	/// Returns a setting that compress fonts, images and content streams, garbage collecting unused objects.
-	/// </summary>
-	/// <returns></returns>
+	/// <summary>Returns a setting that compress fonts, images and content streams, garbage collecting unused objects.</summary>
 	static WriterOptions^ GetNormalMode() {
 		auto o = gcnew WriterOptions();
 		o->CompressFonts = true;

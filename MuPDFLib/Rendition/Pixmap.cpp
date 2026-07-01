@@ -1,4 +1,5 @@
 #include "Pixmap.h"
+#include "Colorspace.h"
 
 #pragma unmanaged
 static fz_pixmap* GetPixmap(fz_context* ctx, fz_colorspace* cs, int width, int height) {
@@ -32,12 +33,26 @@ DLLEXP fz_pixmap* LoadTiffSubImage(fz_context* ctx, const unsigned char* data, s
 	fz_pixmap* p;
 	MuTryReturn(ctx, fz_load_tiff_subimage(ctx, data, length, index), p);
 }
+
+DLLEXP fz_pixmap* Mask(fz_context* ctx, fz_pixmap* color, fz_pixmap* mask) {
+	fz_pixmap* p;
+	MuTryReturn(ctx, fz_new_pixmap_from_color_and_mask(ctx, color, mask), p);
+}
+
+DLLEXP fz_pixmap* ConvertColorspace(fz_context* ctx, fz_pixmap* original, fz_colorspace* target, fz_color_params params) {
+	fz_pixmap* p;
+	MuTryReturn(ctx, fz_convert_pixmap(ctx, original, target, NULL, NULL, params, 0), p);
+}
 #pragma managed
 
 using namespace MuPDF;
 
+MuPDF::Colorspace^ Pixmap::Colorspace::get() {
+	return _colorspace ? _colorspace : (_colorspace = gcnew MuPDF::Colorspace(fz_pixmap_colorspace(Context::Ptr, _pixmap)));
+}
+
 Pixmap^ Pixmap::Create(ColorspaceKind colorspace, int width, int height) {
-	fz_pixmap* pixmap = GetPixmap(Context::Ptr, Context::GetFzColorspace(colorspace), width, height);
+	fz_pixmap* pixmap = GetPixmap(Context::Ptr, MuPDF::Colorspace::ToNativeColorspace(colorspace), width, height);
 	if (pixmap) {
 		return gcnew Pixmap(pixmap);
 	}
@@ -45,7 +60,7 @@ Pixmap^ Pixmap::Create(ColorspaceKind colorspace, int width, int height) {
 }
 
 Pixmap^ Pixmap::Create(ColorspaceKind colorspace, MuPDF::BBox box) {
-	fz_pixmap* pixmap = ::GetPixmap(Context::Ptr, Context::GetFzColorspace(colorspace), box);
+	fz_pixmap* pixmap = ::GetPixmap(Context::Ptr, MuPDF::Colorspace::ToNativeColorspace(colorspace), box);
 	if (pixmap) {
 		return gcnew Pixmap(pixmap);
 	}
@@ -86,4 +101,21 @@ array<Byte>^ Pixmap::GetSampleBytes() {
 	GcnewArray(Byte, d, _width * _height * _components);
 	System::Runtime::InteropServices::Marshal::Copy(_samples, d, 0, d->Length);
 	return d;
+}
+
+Pixmap^ Pixmap::Mask(Pixmap^ mask) {
+	fz_pixmap* pixmap = ::Mask(Context::Ptr, _pixmap, mask->_pixmap);
+	if (pixmap) {
+		return gcnew Pixmap(pixmap);
+	}
+	throw MuException::FromContext();
+}
+
+Pixmap^ Pixmap::ConvertColorspace(ColorspaceKind colorspace, ColorParams^ params) {
+	auto p = params ? params->ToNative() : fz_default_color_params;
+	auto c = ::ConvertColorspace(Context::Ptr, _pixmap, MuPDF::Colorspace::ToNativeColorspace(colorspace), p);
+	if (c) {
+		return gcnew Pixmap(c);
+	}
+	throw MuException::FromContext();
 }

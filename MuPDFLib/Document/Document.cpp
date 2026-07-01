@@ -1,6 +1,7 @@
 #include "Document.h"
 #include "MuException.h"
 #include <vcclr.h>
+
 using namespace System::Runtime::InteropServices;
 
 #pragma unmanaged
@@ -56,6 +57,19 @@ static bool LoadNameTree(fz_context* ctx, pdf_document* doc, pdf_obj* name, pdf_
 	}
 	fz_catch(ctx) {
 		*nameTree = PDF_NULL;
+		r = false;
+	}
+	return r;
+}
+
+DLLEXP bool LoadImage(fz_context* ctx, pdf_document* doc, pdf_obj* imgRef, fz_image** image) {
+	bool r;
+	fz_try(ctx) {
+		*image = pdf_load_image(ctx, doc, imgRef);
+		r = true;
+	}
+	fz_catch(ctx) {
+		*image = NULL;
 		r = false;
 	}
 	return r;
@@ -373,6 +387,25 @@ PdfDictionary^ Document::LoadNameTree(PdfNames name) {
 		throw MuException::FromContext();
 	}
 	return pdf_is_dict(ctx, r) ? gcnew PdfDictionary(r, false) : nullptr;
+}
+
+Image^ Document::LoadImage(PdfReference^ imgRef) {
+	if (!IsImage(imgRef)) {
+		return nullptr;
+	}
+	fz_image* r;
+	if (!::LoadImage(Context::Ptr, _pdf, imgRef->Ptr, &r)) {
+		throw MuException::FromContext();
+	}
+	return gcnew Image(r);
+}
+
+bool Document::IsImage(PdfReference^ pdfRef) {
+	return pdf_is_image_stream(Context::Ptr, pdfRef->Ptr);
+}
+
+bool Document::IsFileSpecification(PdfReference^ pdfRef) {
+	return pdf_is_filespec(Context::Ptr, pdfRef->Ptr);
 }
 
 PdfObject^ Document::GetAssociatedFile(int index) {

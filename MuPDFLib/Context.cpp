@@ -109,10 +109,6 @@ Context^ Context::Current::get() {
 	return _Instance = gcnew Context(fz_clone_context(s_state.m_ctx), true);
 }
 
-Colorspace^ Context::GetColorspace(ColorspaceKind kind) {
-	return gcnew Colorspace(GetFzColorspace(kind));
-}
-
 Context^ Context::MakeMainContext() {
 	return gcnew Context(s_state.m_ctx, false);
 }
@@ -165,14 +161,4 @@ void Context::ReleaseHandle() {
 	_disposed = true;
 }
 
-fz_colorspace* Context::GetFzColorspace(ColorspaceKind kind) {
-	switch (kind) {
-		case ColorspaceKind::RGB: return fz_device_rgb(Ptr);
-		case ColorspaceKind::CMYK: return fz_device_cmyk(Ptr);
-		case ColorspaceKind::Gray: return fz_device_gray(Ptr);
-		case ColorspaceKind::BGR: return fz_device_bgr(Ptr);
-		case ColorspaceKind::LAB: return fz_device_lab(Ptr);
-	}
-	throw gcnew MuException("Invalid colorspace kind.");
-}
 

@@ -2105,6 +2105,7 @@ EXPORTS
 	pdf_validate_change_history
 	pdf_find_version_for_obj
 	pdf_validate_signature
+	pdf_validate_signature_widget
 	pdf_was_pure_xfa
 	pdf_new_local_xref
 	pdf_drop_local_xref

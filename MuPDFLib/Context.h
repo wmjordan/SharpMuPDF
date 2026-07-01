@@ -12,8 +12,6 @@ namespace MuPDF {
 #pragma warning( push )
 #pragma warning( disable : 4091 )
 typedef ref class Document;
-typedef ref class Colorspace;
-typedef enum class ColorspaceKind;
 typedef ref class Pixmap;
 typedef value struct BBox;
 // in mupdf_load_system_font.c
@@ -41,8 +39,6 @@ public:
 		void set(int value) { fz_set_text_aa_level(Ptr, value); }
 	}
 
-	static Colorspace^ GetColorspace(ColorspaceKind kind);
-
 	static void SetErrorCallback(Action<bool, String^>^ callback);
 
 internal:
@@ -53,8 +49,6 @@ internal:
 	static property fz_context* Ptr {
 		fz_context* get() { return Current->_context; }
 	}
-
-	static fz_colorspace* GetFzColorspace(ColorspaceKind kind);
 
 protected:
 	!Context() {

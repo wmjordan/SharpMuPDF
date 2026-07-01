@@ -90,8 +90,8 @@ MuPDF::Matrix MuPDF::Matrix::RotateTo(float theta) {
 	if (fabs(270.0f - theta) < FLT_EPSILON) {
 		return Matrix(-C, -D, A, B, E, F);
 	}
-	float s = sin(theta * FZ_PI / 180);
-	float c = cos(theta * FZ_PI / 180);
+	float s = sinf(theta * FZ_PI / 180);
+	float c = cosf(theta * FZ_PI / 180);
 	return Matrix(c * A + s * C, c * B + s * D, -s * A + c * C, -s * B + c * D, E, F);
 }
 
@@ -130,8 +130,8 @@ MuPDF::Matrix MuPDF::Matrix::Rotate(float theta) {
 		c = 0;
 	}
 	else {
-		s = sin(theta * FZ_PI / 180);
-		c = cos(theta * FZ_PI / 180);
+		s = sinf(theta * FZ_PI / 180.0f);
+		c = cosf(theta * FZ_PI / 180.0f);
 	}
 	return MuPDF::Matrix(c, s, -s, c, 0, 0);
 }
