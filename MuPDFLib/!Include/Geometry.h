@@ -37,6 +37,9 @@ public:
 	static operator Point(fz_point p) {
 		return Point(p.x, p.y);
 	}
+	static operator fz_point(Point p) {
+		return { p.X, p.Y };
+	}
 	virtual String^ ToString() override {
 		return String::Concat(X, ",", Y);
 	}
@@ -46,7 +49,7 @@ value struct BBox;
 value struct Matrix;
 
 /// <summary>
-/// A rectangle with float coordinates.
+/// A rectangle with float coordinates. (fz_rect)
 /// </summary>
 public value struct Box {
 public:
@@ -88,11 +91,11 @@ public:
 	static operator Box(fz_rect rect) {
 		return Box (rect.x0, rect.y0, rect.x1, rect.y1);
 	}
-	static Box operator & (Box a, Box b);
-	static Box operator | (Box a, Box b);
-	static operator fz_rect (Box b) {
+	static operator fz_rect(Box b) {
 		return { b.X0, b.Y0, b.X1, b.Y1 };
 	}
+	static Box operator & (Box a, Box b);
+	static Box operator | (Box a, Box b);
 };
 
 /// <summary>

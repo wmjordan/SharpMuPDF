@@ -1,5 +1,12 @@
 #include "TextPage.h"
 
+#pragma unmanaged
+DLLEXP char * CopySelection(fz_context* ctx, fz_stext_page* page, fz_point a, fz_point b, int crlf) {
+	char* t;
+	MuTryReturn(ctx, fz_copy_selection(ctx, page, a, b, crlf), t);
+}
+
+#pragma managed
 using namespace MuPDF;
 using namespace Runtime::InteropServices;
 
@@ -8,27 +15,28 @@ TextOptions::operator fz_stext_options(TextOptions^ options) {
 	if (options) {
 		s.flags = (int)options->Flags;
 		s.scale = options->Scale;
+		s.clip = (fz_rect)options->Clip;
 	}
 	return s;
 }
 
 String^ TextSpan::ToString() {
-    int l = _length;
-    auto sb = gcnew StringBuilder(l);
-    fz_stext_char* c = _ch;
-    do {
-        sb->Append((Char)c->c);
-    } while (--l > 0 && (c = c->next));
-    return sb->ToString();
+	int l = _length;
+	auto sb = gcnew StringBuilder(l);
+	fz_stext_char* c = _ch;
+	do {
+		sb->Append((Char)c->c);
+	} while (--l > 0 && (c = c->next));
+	return sb->ToString();
 }
 
 String^ TextLine::ToString() {
-    auto sb = gcnew StringBuilder(16);
-    fz_stext_char* c = _line->first_char;
-    do {
-        sb->Append((Char)c->c);
-    } while (c = c->next);
-    return sb->ToString();
+	auto sb = gcnew StringBuilder(16);
+	fz_stext_char* c = _line->first_char;
+	do {
+		sb->Append((Char)c->c);
+	} while (c = c->next);
+	return sb->ToString();
 }
 
 String^ TextBlock::ToString() {
@@ -48,88 +56,113 @@ String^ TextBlock::ToString() {
 }
 
 bool MaybeUtf8(const char* text) {
-    unsigned int b = 0; // byte count
-    const char* p = text;
-    char c;
-    while (c = *p) {
-        if (b == 0) {
-            if (c < 0x80) {
-                goto NEXT;
-            }
-            // multibyte
-            if (c < 0xC0) {
-                b = 1;
-            }
-            else if (c < 0xE0) {
-                b = 2;
-            }
-            else if (c < 0xF0) {
-                b = 3;
-            }
-            else if (c < 0xF8) {
-                b = 4;
-            }
-            else if (c < 0xFE) {
-                b = 5;
-            }
-            else {
-                return false;
-            }
-        }
-        else {
-            // multi-byte subsequent char: 10xxxxxx
-            if ((c & 0xC0) != 0x80) {
-                return false;
-            }
-            b--;
-        }
-    NEXT:
-        ++p;
-    }
-    return b == 0;
+	unsigned int b = 0; // byte count
+	const char* p = text;
+	char c;
+	while (c = *p) {
+		if (b == 0) {
+			if (c < 0x80) {
+				goto NEXT;
+			}
+			// multibyte
+			if (c < 0xC0) {
+				b = 1;
+			}
+			else if (c < 0xE0) {
+				b = 2;
+			}
+			else if (c < 0xF0) {
+				b = 3;
+			}
+			else if (c < 0xF8) {
+				b = 4;
+			}
+			else if (c < 0xFE) {
+				b = 5;
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			// multi-byte subsequent char: 10xxxxxx
+			if ((c & 0xC0) != 0x80) {
+				return false;
+			}
+			b--;
+		}
+	NEXT:
+		++p;
+	}
+	return b == 0;
 }
 
 bool TextLine::TextLineSpanContainer::MoveNext() {
-    if (!_start) {
-        return false;
-    }
-    auto end = _start;
-    auto p = end->next;
-    auto font = _start->font;
-    auto color = _start->argb;
-    auto size = _start->size;
-    Quad quad = _start->quad;
-    int length = 1;
-    while (p) {
-        if (p->font != font || p->size != size || p->argb != color) {
-            _Current = gcnew TextSpan(_start, length, quad.Union(p->quad).ToBox(), _Line->IsVertical);
-            _start = p;
-            return true;
-        }
-        end = p;
-        p = p->next;
-        ++length;
-    }
-    _Current = gcnew TextSpan(_start, length, end == _start ? quad.ToBox() : quad.Union(end->quad).ToBox(), _Line->IsVertical);
-    _start = NULL;
-    return true;
+	if (!_start) {
+		return false;
+	}
+	auto end = _start;
+	auto p = end->next;
+	auto font = _start->font;
+	auto color = _start->argb;
+	auto size = _start->size;
+	Quad quad = _start->quad;
+	int length = 1;
+	while (p) {
+		if (p->font != font || p->size != size || p->argb != color) {
+			_Current = gcnew TextSpan(_start, length, quad.Union(p->quad).ToBox(), _Line->IsVertical);
+			_start = p;
+			return true;
+		}
+		end = p;
+		p = p->next;
+		++length;
+	}
+	_Current = gcnew TextSpan(_start, length, end == _start ? quad.ToBox() : quad.Union(end->quad).ToBox(), _Line->IsVertical);
+	_start = NULL;
+	return true;
 }
 
 void TextLine::TextLineSpanContainer::Reset() {
-    _Current = nullptr;
-    _active = NULL;
-    _start = _Line->_line->first_char;
+	_Current = nullptr;
+	_active = NULL;
+	_start = _Line->_line->first_char;
 }
 
 array<Byte>^ TextFont::GetFontNameBytes() {
-    GcnewArray(Byte, b, 32);
-    auto n = _font->name;
-    Marshal::Copy((System::IntPtr)(void*)n, b, 0, 32);
-    return b;
+	GcnewArray(Byte, b, 32);
+	auto n = _font->name;
+	Marshal::Copy((System::IntPtr)(void*)n, b, 0, 32);
+	return b;
 }
 
 array<short>^ TextFont::GetWidths() {
-    GcnewArray(short, a, _font->width_count);
-    Marshal::Copy((System::IntPtr)(void*)_font->width_table, a, 0, _font->width_count);
-    return a;
+	GcnewArray(short, a, _font->width_count);
+	Marshal::Copy((System::IntPtr)(void*)_font->width_table, a, 0, _font->width_count);
+	return a;
+}
+
+int MuPDF::TextPage::CountSelectionRegions(Point from, Point to) {
+	return fz_highlight_selection(Context::Ptr, _page, (fz_point)from, (fz_point)to, NULL, 0);
+}
+
+array<Quad>^ MuPDF::TextPage::GetSelectionRegions(Point from, Point to) {
+	auto n = fz_highlight_selection(Context::Ptr, _page, (fz_point)from, (fz_point)to, NULL, 0);
+	if (n == 0) {
+		return nullptr;
+	}
+	fz_quad* quads = new fz_quad[n];
+	fz_highlight_selection(Context::Ptr, _page, (fz_point)from, (fz_point)to, quads, n);
+	GcnewArray(Quad, r, n);
+	for (int i = 0; i < n; i++) {
+		r[i] = (Quad)quads[i];
+	}
+	return r;
+}
+
+String^ MuPDF::TextPage::GetSelectionText(Point from, Point to) {
+	auto u8s = CopySelection(Context::Ptr, _page, (fz_point)from, (fz_point)to, true);
+	auto t = DecodeUTF8(u8s);
+	fz_free(Context::Ptr, u8s);
+	return t;
 }

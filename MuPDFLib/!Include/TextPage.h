@@ -36,7 +36,9 @@ public enum class TextOption {
 	InhibitSpaces = 8,
 	Dehyphenate = 16,
 	PreserveSpans = 32,
+	[ObsoleteAttribute]
 	MediaBoxClip = 64,
+	Clip = 64,
 	UseCidForUnknownUnicode = 128,
 	CollectStructure = 256,
 	AccurateBBoxes = 512,
@@ -47,6 +49,11 @@ public enum class TextOption {
 	TableHunt = 16384,
 	CollectStyles = 32768,
 	UseGidForUnknownUnicode = 65536,
+	ClipRect = (1 << 17),
+	AccurateAscenders = (1 << 18),
+	AccurateSideBearings = (1 << 19),
+	LazyVectors = (1 << 20),
+	FuzzyVectors = (1 << 21),
 };
 
 [FlagsAttribute]
@@ -71,11 +78,12 @@ public enum class FontFlags {
 
 public ref class TextOptions {
 public:
-	TextOption Flags;
+	TextOption Flags = TextOption::Clip;
 	/// <summary>
 	/// Defines scale ratio for text rendition. Base resolution is 96 DPI.
 	/// </summary>
 	float Scale = 1;
+	Box Clip;
 
 	static operator fz_stext_options(TextOptions^ options);
 };
@@ -326,6 +334,9 @@ public:
 	PropGet(Box, Bound, _page->mediabox);
 	PropGet(TextBlock^, FirstBlock, gcnew TextBlock(_page->first_block));
 	PropGet(TextBlock^, LastBlock, gcnew TextBlock(_page->last_block));
+	int CountSelectionRegions(Point from, Point to);
+	array<Quad>^ GetSelectionRegions(Point from, Point to);
+	String^ GetSelectionText(Point from, Point to);
 
 	String^ ToString() override {
 		return Bound.ToString();

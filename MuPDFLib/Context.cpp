@@ -147,8 +147,11 @@ void Context::ReleaseHandle() {
 		if (_errorCallbackHandle.IsAllocated) {
 			_errorCallbackHandle.Free();
 		}
-		fz_drop_context(_context);
-		_context = NULL;
+		if (_Instance) {
+			fz_drop_context(_Instance->_context);
+			_Instance->_context = NULL;
+			_Instance = nullptr;
+		}
 		_disposed = true;
 		return;
 	}
