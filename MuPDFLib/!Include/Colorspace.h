@@ -32,9 +32,11 @@ public enum class ColorspaceFlags
 public ref class Colorspace sealed {
 
 public:
+	/// <summary>Creates a component-N colorspace</summary>
 	Colorspace(ColorspaceKind kind, ColorspaceFlags flags, int n, String^ name);
 	/// <summary>Creates an ICC colorspace</summary>
 	Colorspace(ColorspaceKind kind, ColorspaceFlags flags, String^ name, Buffer^ buffer);
+	/// <summary>Gets a reference to predefined device colorspace</summary>
 	Colorspace(ColorspaceKind kind) : Colorspace(ToNativeColorspace(kind)) {};
 
 	PropGet(ColorspaceKind, Kind, static_cast<ColorspaceKind>(_colorspace ? _colorspace->type : 0));
@@ -45,6 +47,7 @@ public:
 	PropEmptyGet(bool, IsSubtractive);
 	PropEmptyGet(bool, IsDeviceNHasOnlyCmyk);
 	PropEmptyGet(bool, IsDeviceNHasCmyk);
+	PropEmptyGet(bool, IsLabIcc);
 	PropEmptyGet(Colorspace^, Base);
 	PropEmptyGet(String^, Name);
 

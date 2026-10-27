@@ -42,6 +42,10 @@ bool MuPDF::Colorspace::IsDeviceNHasCmyk::get() {
 	return fz_colorspace_device_n_has_cmyk(Context::Ptr, _colorspace);
 }
 
+bool MuPDF::Colorspace::IsLabIcc::get() {
+	return fz_colorspace_is_lab_icc(Context::Ptr, _colorspace);
+}
+
 Colorspace^ Colorspace::Base::get() {
 	auto b = fz_base_colorspace(Context::Ptr, _colorspace);
 	return b == _colorspace ? this : gcnew Colorspace(b);
