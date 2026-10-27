@@ -33,6 +33,8 @@ public ref class Colorspace sealed {
 
 public:
 	Colorspace(ColorspaceKind kind, ColorspaceFlags flags, int n, String^ name);
+	/// <summary>Creates an ICC colorspace</summary>
+	Colorspace(ColorspaceKind kind, ColorspaceFlags flags, String^ name, Buffer^ buffer);
 	Colorspace(ColorspaceKind kind) : Colorspace(ToNativeColorspace(kind)) {};
 
 	PropGet(ColorspaceKind, Kind, static_cast<ColorspaceKind>(_colorspace ? _colorspace->type : 0));
