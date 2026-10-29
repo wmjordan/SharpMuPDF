@@ -5,6 +5,8 @@
 
 #define GcnewArray(TManage, var, Length) array<TManage>^ var = gcnew array<TManage>(Length);
 
+#define PinArray(TManage, var, ptr) pin_ptr<TManage> ptr = (var && var->Length != 0) ? &var[0] : nullptr
+
 #define GcWrap(TManage, ptr) (ptr ? gcnew TManage(ptr) : nullptr)
 
 #define Unwrap(TManage) (TManage ? TManage->Ptr : NULL)

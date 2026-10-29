@@ -31,6 +31,8 @@ internal:
 		this->!CompressedBuffer();
 	}
 
+	PropGet(fz_compressed_buffer*, Ptr, _buffer);
+
 private:
 	fz_compressed_buffer* _buffer;
 	!CompressedBuffer();

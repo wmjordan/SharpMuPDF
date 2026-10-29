@@ -58,6 +58,7 @@ public:
 	static Image^ Load(Buffer^ buffer);
 	static Image^ Load(array<Byte>^ data);
 	static Image^ FromPixmap(Pixmap^ pixmap, Image^ mask);
+	static Image^ Load(int width, int height, int bpc, MuPDF::Colorspace^ colorspace, int xres, int yres, bool interpolate, bool isMask, array<float>^ decode, array<int>^ colorkey, CompressedBuffer^ buffer, Image^ mask);
 	static Image^ FromPixmap(Pixmap^ pixmap) {
 		return FromPixmap(pixmap, nullptr);
 	}
