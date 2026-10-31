@@ -27,6 +27,7 @@ public enum class ImageType {
 	// Uncompressed types
 	Raw,
 	// Compressed types
+	Fax,
 	Flate,
 	LZW,
 	RLD,
