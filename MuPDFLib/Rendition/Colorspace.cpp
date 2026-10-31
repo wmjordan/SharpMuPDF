@@ -1,15 +1,28 @@
 #include "Colorspace.h"
 #include "fitz.h"
+
+#pragma unmanaged
+static fz_colorspace* CreateNColorspace(fz_context* ctx, enum fz_colorspace_type type, int flags, int n, const char* csn) {
+	fz_colorspace* s;
+	MuTryReturn(ctx, fz_new_colorspace(ctx, type, flags, n, csn), s);
+}
+
+static fz_colorspace* CreateIccColorspace(fz_context* ctx, enum fz_colorspace_type type, int flags, const char* csn, fz_buffer* buffer) {
+	fz_colorspace* s;
+	MuTryReturn(ctx, fz_new_icc_colorspace(ctx, type, flags, csn, buffer), s);
+}
+
+#pragma managed
 using namespace MuPDF;
 
 Colorspace::Colorspace(ColorspaceKind kind, ColorspaceFlags flags, int n, String^ name) {
 	EncodeUTF8(name, csn)
-	_colorspace = fz_new_colorspace(Context::Ptr, static_cast<enum fz_colorspace_type>(kind), (int)flags, n, (const char*)csn);
+	_colorspace = CreateNColorspace(Context::Ptr, static_cast<enum fz_colorspace_type>(kind), (int)flags, n, (const char*)csn);
 }
 
 Colorspace::Colorspace(ColorspaceKind kind, ColorspaceFlags flags, String^ name, Buffer^ buffer) {
 	EncodeUTF8(name, csn)
-	_colorspace = fz_new_icc_colorspace(Context::Ptr, static_cast<enum fz_colorspace_type>(kind), (int)flags, (const char*)csn, buffer->Ptr);
+	_colorspace = CreateIccColorspace(Context::Ptr, static_cast<enum fz_colorspace_type>(kind), (int)flags, (const char*)csn, buffer->Ptr);
 }
 
 
