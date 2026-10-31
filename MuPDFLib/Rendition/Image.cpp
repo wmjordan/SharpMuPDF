@@ -1,11 +1,4 @@
 #include "Image.h"
-#include <Buffer.h>
-#include <Colorspace.h>
-#include <MuException.h>
-#include <ObjWrapper.h>
-#include <Stream.h>
-#include <mupdf/fitz/context.h>
-#include <mupdf/fitz/image.h>
 
 #pragma unmanaged
 static fz_image* LoadImage(fz_context* ctx, const char* file) {
@@ -27,7 +20,7 @@ static fz_image* LoadImageFromPdf(fz_context* ctx, int width, int height, int bp
 
 using namespace MuPDF;
 
-Colorspace^ Image::Colorspace::get() {
+MuPDF::Colorspace^ Image::Colorspace::get() {
 	return gcnew MuPDF::Colorspace(_img->colorspace);
 }
 

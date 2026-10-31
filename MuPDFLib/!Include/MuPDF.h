@@ -4,6 +4,8 @@
 #include "ObjWrapper.h"
 #include "Geometry.h"
 #include "Cookie.h"
+#include "Buffer.h"
+#include "CompressedBuffer.h"
 #include "Colorspace.h"
 #include "../Context.h"
 #include "Pixmap.h"

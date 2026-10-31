@@ -2,7 +2,6 @@
 #define __COLORSPACE
 
 #pragma once
-#include "fitz.h"
 #include "MuPDF.h"
 
 namespace MuPDF {

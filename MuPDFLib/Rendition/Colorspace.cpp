@@ -1,4 +1,5 @@
 #include "Colorspace.h"
+#include "fitz.h"
 using namespace MuPDF;
 
 Colorspace::Colorspace(ColorspaceKind kind, ColorspaceFlags flags, int n, String^ name) {

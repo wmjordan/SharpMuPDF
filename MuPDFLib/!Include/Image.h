@@ -1,14 +1,8 @@
-#include "../Context.h"
-#include "Buffer.h"
-#include "Colorspace.h"
-#include "CompressedBuffer.h"
-#include "Geometry.h"
-#include "Pixmap.h"
-#include "ObjWrapper.h"
-
 #ifndef __IMAGE
 #define __IMAGE
 #pragma once
+
+#include "MuPDF.h"
 
 using namespace System;
 
